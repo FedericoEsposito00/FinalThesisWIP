@@ -1,0 +1,667 @@
+<?xml version="1.0"?>
+
+<!-- Robot Name --> 
+<robot name="CraneBot" xmlns:xacro="http://ros.org/wiki/xacro">
+
+<!-- Import Transmissions -->
+<xacro:include filename="$(find uav-cable-suspended-robots-ros-pkg)/urdf/cranebot.transmission.xacro" />
+<xacro:CraneBot_transmission name="CraneBot" hardware_interface="hardware_interface/EffortJointInterface"/> 
+
+<!-- Import Gazebo plugins -->
+<xacro:include filename="$(find uav-cable-suspended-robots-ros-pkg)/gazebo/gazebo_cranebot.urdf.xacro"/>
+
+
+<!-- Kinematic Params -->
+<xacro:property name="L" value="3.357" />      <!-- Lenght of the cables -->
+<xacro:property name="d" value="0.1260" />      <!-- Distance center lower pulleys - center of the hook -->
+<xacro:property name="D" value="1.1024" />      <!-- Distance Hook - First joint -->
+<xacro:property name="off" value="0.1900" />    <!-- Half of the distance between the arms  -->
+<xacro:property name="L0" value="0.2604" />     <!-- Height of Foot -->
+<xacro:property name="L1" value="0.3500" />     <!-- Length of the first connector -->
+<xacro:property name="L2" value="0.3070" />     <!-- Length of the second connector -->
+<xacro:property name="L3" value="0.0840" />     <!-- Distance last joint to flange -->
+
+<!-- Mass -->
+<xacro:property name="massCablesPulley" value="35.55" />
+<xacro:property name="massPlatform" value="156.25" />
+<!-- <xacro:property name="massCablesPulleyPlatform" value="192" /> -->
+<xacro:property name="massArmsLink1" value="7.1" />
+<xacro:property name="massArmsLink2" value="1.7" />
+<xacro:property name="massArmsLink3" value="4.8" />
+<xacro:property name="massArmsLink4" value="0.9" />
+<xacro:property name="massArmsLink5" value="2.6" />
+<xacro:property name="massArmsFlange" value="0.2" />
+
+<!-- Center of mass -->
+<xacro:property name="comCablesPulleys">
+  <origin xyz="0 0 -1.894" />
+</xacro:property>
+<xacro:property name="comPlatform">
+  <origin xyz="0 0 -0.521" />
+</xacro:property>
+<xacro:property name="comArmsLink1">
+  <origin xyz="0 -0.026 -0.051" />
+</xacro:property>
+<xacro:property name="comArmsLink2">
+  <origin xyz="0 0.162 0.134" />
+</xacro:property>
+<xacro:property name="comArmsLink3">
+  <origin xyz="0 0.043 -0.027" />
+</xacro:property>
+<xacro:property name="comArmsLink4">
+  <origin xyz="0 -0.061 0.204" />
+</xacro:property>
+<xacro:property name="comArmsLink5">
+  <origin xyz="-0.001 0.021 -0.032" />
+</xacro:property>
+<xacro:property name="comArmsFlange">
+  <origin xyz="0 0 0" />
+</xacro:property>
+
+<!-- Inertia -->
+<xacro:property name="inertiaCablesPulleysX" value="35.37" />
+<xacro:property name="inertiaCablesPulleysY" value="58.23" />
+<xacro:property name="inertiaCablesPulleysZ" value="5.807" />
+<xacro:property name="inertiaArmsLink1">
+    <inertia ixx="3.53e-2" ixy="0" ixz="0" iyy="3.01e-2" iyz="9.04e-3" izz="1.87e-2"/>
+</xacro:property>
+<xacro:property name="inertiaArmsLink2">
+    <inertia ixx="3.58e-2" ixy="0" ixz="0" iyy="3.22e-3" iyz="-1.45e-3" izz="3.66e-2"/>
+</xacro:property>
+<xacro:property name="inertiaArmsLink3">
+    <inertia ixx="2.06e-2" ixy="0" ixz="0" iyy="1.08e-2" iyz="-5.36e-3" izz="1.63e-2"/>
+</xacro:property>
+<xacro:property name="inertiaArmsLink4">
+    <inertia ixx="6.79e-3" ixy="0" ixz="0" iyy="4.91e-3" iyz="2.67e-3" izz="3.40e-3"/>
+</xacro:property>
+<xacro:property name="inertiaArmsLink5">
+    <inertia ixx="7.37e-3" ixy="4.78e-6" ixz="6.00e-5" iyy="5.87e-3" iyz="-1.71e-3" izz="3.96e-3" />
+</xacro:property>
+<xacro:property name="inertiaArmsFlange">
+    <inertia ixx="0" ixy="0"	ixz="0" iyy="0" iyz="0" izz="0"/>
+</xacro:property>
+
+
+<!-- Limits -->
+<xacro:property name="cablesJointLimits">
+  <limit effort="10000.0" lower="${-180/180*pi}" upper="${180/180*pi}" velocity="50"/>
+</xacro:property>
+<xacro:property name="platformJointLimits">
+  <limit effort="10000.0" lower="${-180/180*pi}" upper="${180/180*pi}" velocity="50"/>
+</xacro:property>
+<xacro:property name="effLimArmsJ1" value="370" />
+<xacro:property name="effLimArmsJ2" value="370" />
+<xacro:property name="effLimArmsJ3" value="176" />
+<xacro:property name="effLimArmsJ4" value="176" />
+<xacro:property name="effLimArmsJ5" value="41.6" />
+<xacro:property name="effLimArmsJ6" value="20.1" />
+<xacro:property name="velLimArms" value="1.57" />
+<xacro:property name="posLimArmsJ1" value="2.96706" />
+<xacro:property name="posLimArmsJ2" value="2.53073" />
+<xacro:property name="posLimArmsJ3" value="2.35620" />
+<xacro:property name="posLimArmsJ4" value="2.96706" />
+<xacro:property name="posLimArmsJ5" value="2.96706" />
+<xacro:property name="posLimArmsJ6" value="3.12414" />
+
+<!-- Damping and Friction -->
+<xacro:property name="dampCablesJx" value="485.3"/>
+<xacro:property name="dampCablesJy" value="52.7"/>
+<xacro:property name="dampCablesJz" value="0.9"/>
+<xacro:property name="dampPlatformJx" value="0.0"/>
+<xacro:property name="dampPlatformJy" value="0.0"/>
+<xacro:property name="dampPlatformJz" value="0.0"/>
+<xacro:property name="dampArmsJ1" value="15.0"/>
+<xacro:property name="dampArmsJ2" value="12.0"/>
+<xacro:property name="dampArmsJ3" value="4.5"/>
+<xacro:property name="dampArmsJ4" value="4.2"/>
+<xacro:property name="dampArmsJ5" value="1.5"/>
+<xacro:property name="dampArmsJ6" value="4.5"/>
+<xacro:property name="fricCablesJx" value="0.767"/>
+<xacro:property name="fricCablesJy" value="0.0"/>
+<xacro:property name="fricCablesJz" value="0.01"/>
+<xacro:property name="fricPlatformJx" value="0.0"/>
+<xacro:property name="fricPlatformJy" value="0.0"/>
+<xacro:property name="fricPlatformJz" value="0.0"/>
+<xacro:property name="fricArmsJ1" value="11.0"/>
+<xacro:property name="fricArmsJ2" value="10.0"/>
+<xacro:property name="fricArmsJ3" value="4.5"/>
+<xacro:property name="fricArmsJ4" value="3.8"/>
+<xacro:property name="fricArmsJ5" value="3.5"/>
+<xacro:property name="fricArmsJ6" value="7.0"/>
+
+<link name="world"/>
+
+<!-- CRANE -->
+<joint name="bridge_joint" type="fixed">
+  <origin xyz="0 0 6"/>
+  <parent link="world"/>
+  <child link="bridge"/>
+  <axis xyz="1 0 0"/>
+  <dynamics damping="100.0" friction="100.0"/>
+  <limit effort="10.0" lower="-100" upper="100" velocity="6"/>
+</joint>
+
+<link name="bridge">
+  <inertial>
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <mass value="10000" />
+    <inertia ixx="100" ixy="0.0" ixz="0.0" iyy="100" iyz="0.0" izz="100"/>
+  </inertial>
+  <visual>
+    <origin rpy="${pi/2} 0 ${pi/2}" xyz="0 0 0"/>
+    <geometry>
+      <mesh filename="package://cable-suspended-robots-ros-pkg/mesh/cranebot/craneCMS_bridge.stl"/>
+    </geometry>
+  </visual>
+  <collision>
+    <origin rpy="${pi/2} 0 ${pi/2}" xyz="0 0 0"/>
+    <geometry>
+      <mesh filename="package://cable-suspended-robots-ros-pkg/mesh/cranebot/craneCMS_bridge.stl"/>
+    </geometry>
+  </collision>
+</link>
+
+<joint name="trolley_joint" type="fixed">
+  <origin xyz="0 0 0"/>
+  <parent link="bridge"/>
+  <child link="trolley"/>
+  <axis xyz="0 1 0"/>
+  <dynamics damping="100.0" friction="100.0"/>
+  <limit effort="10.0" lower="0.0" upper="16.98" velocity="0.266666666"/> 
+</joint>
+
+<link name="trolley">
+  <inertial>
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <mass value="1000" />
+    <inertia ixx="40" ixy="0.0" ixz="0.0" iyy="40" iyz="0.0" izz="40"/>
+  </inertial>
+  <visual>
+    <origin rpy="${pi/2} 0 ${pi/2}" xyz="0 0 0"/>
+    <geometry>
+      <mesh filename="package://cable-suspended-robots-ros-pkg/mesh/cranebot/craneCMS_trolley.stl"/>
+    </geometry>
+  </visual>
+  <collision>
+    <origin rpy="${pi/2} 0 ${pi/2}" xyz="0 0 0"/>
+    <geometry>
+      <mesh filename="package://cable-suspended-robots-ros-pkg/mesh/cranebot/craneCMS_trolley.stl"/>
+    </geometry>
+  </collision>
+</link>
+
+
+<!-- CABLES -->
+<joint name="cables_joint_z" type="revolute" >
+  <origin rpy="0 0 0" xyz="0 1.01 -0.159"/>
+  <parent link="trolley" />
+  <child link="cables_z" />
+  <axis xyz="0 0 1" />
+  <xacro:insert_block name="cablesJointLimits" />
+  <dynamics damping="${dampCablesJz}" friction="${fricCablesJz}"/>
+</joint>
+
+<link name="cables_z">
+  <inertial>
+    <mass value="${massCablesPulley/3}"/>
+    <xacro:insert_block name="comCablesPulleys" />
+    <inertia ixx="1" ixy="0.0" ixz="0.0" iyy="1" iyz="0.0" izz="${inertiaCablesPulleysZ}"/> 
+  </inertial>
+</link>
+
+<joint name="cables_joint_x" type="revolute" >
+  <parent link="cables_z" />
+  <child link="cables_x" />
+  <axis xyz="1 0 0" />
+  <xacro:insert_block name="cablesJointLimits" />
+  <dynamics damping="${dampCablesJx}" friction="${fricCablesJx}"/>
+</joint>
+
+<link name="cables_x">
+  <inertial>
+    <mass value="${massCablesPulley/3}"/>
+    <xacro:insert_block name="comCablesPulleys" />
+    <inertia ixx="${inertiaCablesPulleysX}" ixy="0.0" ixz="0.0" iyy="1" iyz="0.0" izz="1e-3"/> 
+  </inertial>
+</link>
+
+<joint name="cables_joint_y" type="revolute" >
+  <parent link="cables_x" />
+  <child link="cables_y" />
+  <axis xyz="0 1 0" />
+  <xacro:insert_block name="cablesJointLimits" />
+  <dynamics damping="${dampCablesJy}" friction="${fricCablesJy}"/>
+</joint>
+
+<link name="cables_y">
+  <inertial>
+    <mass value="${massCablesPulley/3}"/>
+    <xacro:insert_block name="comCablesPulleys" />
+    <inertia ixx="1" ixy="0.0" ixz="0.0" iyy="${inertiaCablesPulleysY}" iyz="0.0" izz="1e-3"/> 
+  </inertial>
+  <visual>
+    <origin rpy="0 0 0" xyz="0 0.0 -0.197"/>
+    <geometry>
+      <mesh filename="package://cable-suspended-robots-ros-pkg/mesh/cranebot/cables_pulley.stl"/>
+    </geometry>
+  </visual>
+</link> 
+
+
+<!-- PLATFORM -->
+<!-- Joint between the cables and platform -->
+<joint name="platform_joint_z" type="revolute" >
+  <origin rpy="0 0 0" xyz="0 0 -${L+d}"/>
+  <parent link="cables_y" />
+  <child link="platform_z" />
+  <axis xyz="0 0 1" />
+  <xacro:insert_block name="platformJointLimits" />
+  <dynamics damping="${dampPlatformJz}" friction="${fricPlatformJz}"/>
+</joint>
+
+<link name="platform_z">
+  <inertial>
+    <mass value="${massPlatform/3}"/>
+    <xacro:insert_block name="comPlatform" />
+    <inertia ixx="1" ixy="0.0" ixz="0.0" iyy="1" iyz="0.0" izz="1e-3"/> 
+  </inertial>
+</link>
+
+<joint name="platform_joint_x" type="revolute" >
+  <parent link="platform_z" />
+  <child link="platform_x" />
+  <axis xyz="1 0 0" />
+  <xacro:insert_block name="platformJointLimits" />
+  <dynamics damping="${dampPlatformJx}" friction="${fricPlatformJx}"/>
+</joint>
+
+<link name="platform_x">
+  <inertial>
+    <mass value="${massPlatform/3}"/>
+    <xacro:insert_block name="comPlatform" />
+    <inertia ixx="1" ixy="0.0" ixz="0.0" iyy="1" iyz="0.0" izz="1e-3"/> 
+  </inertial>
+</link>
+
+<joint name="platform_joint_y" type="revolute" >
+  <parent link="platform_x" />
+  <child link="platform_y" />
+  <axis xyz="0 1 0" />
+  <xacro:insert_block name="platformJointLimits" />
+  <dynamics damping="${dampPlatformJy}" friction="${fricPlatformJy}"/>
+</joint>
+
+<link name="platform_y">
+  <inertial>
+    <mass value="${massPlatform/3}"/>
+    <xacro:insert_block name="comPlatform" />
+    <inertia ixx="1" ixy="0.0" ixz="0.0" iyy="1" iyz="0.0" izz="1e-3"/> 
+  </inertial>
+  <visual>
+    <geometry>
+      <mesh filename="package://cable-suspended-robots-ros-pkg/mesh/cranebot/platform_hook6_pilzbase.stl"/>
+    </geometry>
+  </visual>
+  <collision>
+    <geometry>
+      <mesh filename="package://cable-suspended-robots-ros-pkg/mesh/cranebot/platform_hook6_pilzbase.stl"/>
+    </geometry>
+  </collision>
+</link>
+
+<!-- ARMS -->
+<!-- Joint between CraneBot platform and Link1A (first ERB145) -->
+<joint name="platform_erb145_joint_A" type="revolute">
+  <origin rpy="${pi} 0 ${pi}" xyz="0 -${off} -${D}"/>
+  <parent link="platform_y"/>
+  <child link="erb145_link1_A"/>
+  <axis xyz="0 0 1"/>
+  <limit effort="${effLimArmsJ1}" velocity="${velLimArms}" lower="-${posLimArmsJ1}" upper="${posLimArmsJ1}" />
+  <dynamics damping="${dampArmsJ1}" friction="${fricArmsJ1}"/>
+</joint>
+
+
+<!-- Link1A (first ERB145) -->
+<link name="erb145_link1_A">
+  <inertial>
+    <mass value="${massArmsLink1}"/>
+    <xacro:insert_block name="comArmsLink1" />
+    <xacro:insert_block name="inertiaArmsLink1" />
+  </inertial>
+  <visual>
+    <geometry>
+      <mesh filename="package://cable-suspended-robots-ros-pkg/mesh/cranebot/link1_pilz.stl"/>
+    </geometry>
+  </visual>
+  <collision>
+    <geometry>
+      <mesh filename="package://cable-suspended-robots-ros-pkg/mesh/cranebot/link1_pilz.stl"/>
+    </geometry>
+  </collision>
+</link>
+
+<!-- Joint between Link1A (first ERB145) and Link2A -->
+<joint name="erb145_link2_joint_A" type="revolute">
+  <origin rpy="${pi/2} 0 0" xyz="0 0 0.0"/>
+  <parent link="erb145_link1_A"/>
+  <child link="link2_A"/>
+  <axis xyz="0 0 1"/>
+  <limit effort="${effLimArmsJ2}" velocity="${velLimArms}" lower="-${posLimArmsJ2}" upper="${posLimArmsJ2}" />
+  <dynamics damping="${dampArmsJ2}" friction="${fricArmsJ2}"/>
+</joint>
+
+<!-- Link2A -->
+<link name="link2_A">
+  <inertial>
+    <mass value="${massArmsLink2}"/>
+    <xacro:insert_block name="comArmsLink2" />
+    <xacro:insert_block name="inertiaArmsLink2" />
+  </inertial>
+  <visual>
+    <geometry>
+      <mesh filename="package://cable-suspended-robots-ros-pkg/mesh/cranebot/link2_pilz.stl"/>
+    </geometry>
+  </visual>
+  <collision>
+    <geometry>
+      <mesh filename="package://cable-suspended-robots-ros-pkg/mesh/cranebot/link2_pilz.stl"/>
+    </geometry>
+  </collision>
+</link>
+
+
+<!-- Joint between Link2A and Link3A (second ERB145) -->
+<joint name="link2_erb145_joint_A" type="revolute">
+  <origin xyz="0 ${L1} 0" rpy="0 ${pi} 0"/>
+  <parent link="link2_A"/>
+  <child link="erb145_link3_A"/>
+  <axis xyz="0 0 1"/>
+  <limit effort="${effLimArmsJ3}" velocity="${velLimArms}" lower="-${posLimArmsJ3}" upper="${posLimArmsJ3}" />
+  <dynamics damping="${dampArmsJ3}" friction="${fricArmsJ3}"/>
+</joint>
+
+<!-- Link3A (second ERB145) -->
+<link name="erb145_link3_A">
+  <inertial>
+    <mass value="${massArmsLink3}"/>
+    <xacro:insert_block name="comArmsLink3" />
+    <xacro:insert_block name="inertiaArmsLink3" />
+  </inertial>
+  <visual>
+    <geometry>
+      <mesh filename="package://cable-suspended-robots-ros-pkg/mesh/cranebot/link3_pilz.stl"/>
+    </geometry>
+  </visual>
+  <collision>
+    <geometry>
+      <mesh filename="package://cable-suspended-robots-ros-pkg/mesh/cranebot/link3_pilz.stl"/>
+    </geometry>
+  </collision>   
+</link>
+
+<!-- Joint between Link3A (second ERB145) and Link4A -->
+<joint name="erb145_link4_joint_A" type="revolute">
+  <origin xyz="0 0 0" rpy="-${pi/2} ${pi} 0" />
+  <parent link="erb145_link3_A"/>
+  <child link="link4_A"/>
+  <axis xyz="0 0 1"/>
+  <limit effort="${effLimArmsJ4}" velocity="${velLimArms}" lower="-${posLimArmsJ4}" upper="${posLimArmsJ4}" />
+  <dynamics damping="${dampArmsJ4}" friction="${fricArmsJ4}"/>
+</joint>
+
+<!-- Link4A -->
+<link name="link4_A">
+  <inertial>
+    <mass value="${massArmsLink4}"/>
+    <xacro:insert_block name="comArmsLink4" />
+    <xacro:insert_block name="inertiaArmsLink4" />
+  </inertial>
+  <visual>
+    <geometry>
+      <mesh filename="package://cable-suspended-robots-ros-pkg/mesh/cranebot/link4_pilz.stl"/>
+    </geometry>
+  </visual>
+  <collision>
+    <geometry>
+      <mesh filename="package://cable-suspended-robots-ros-pkg/mesh/cranebot/link4_pilz.stl"/>
+    </geometry>
+  </collision>
+</link>
+
+<!-- Joint between Link4A and Link5A (ERB115) -->
+<joint name="link4_erb115_joint_A" type="revolute">
+  <origin xyz="0 0 ${L2}" rpy="${pi/2} 0 ${pi}" />
+  <parent link="link4_A"/>
+  <child link="erb115_link5_A"/>
+  <axis xyz="0 0 1"/>
+  <limit effort="${effLimArmsJ5}" velocity="${velLimArms}" lower="-${posLimArmsJ5}" upper="${posLimArmsJ5}" />
+  <dynamics damping="${dampArmsJ5}" friction="${fricArmsJ5}"/>
+</joint>
+
+<!-- Link5A (ERB115) -->
+<link name="erb115_link5_A">
+  <inertial>
+    <mass value="${massArmsLink5}"/>
+    <xacro:insert_block name="comArmsLink5" />
+    <xacro:insert_block name="inertiaArmsLink5" />
+  </inertial>
+  <visual>
+    <geometry>
+      <mesh filename="package://cable-suspended-robots-ros-pkg/mesh/cranebot/link5_pilz.stl"/>
+    </geometry>
+  </visual>
+  <collision>
+    <geometry>
+      <mesh filename="package://cable-suspended-robots-ros-pkg/mesh/cranebot/link5_pilz.stl"/>
+    </geometry>
+  </collision>
+</link>
+
+<!-- Joint between Link5A (ERB115) and GripperA -->
+<joint name="link5_gripper_joint_A" type="revolute">
+  <origin xyz="0 ${L3} 0" rpy="-${pi/2} 0 0" />
+  <parent link="erb115_link5_A"/>
+  <child link="gripper_A"/>
+  <axis xyz="0 0 1"/>
+  <limit effort="${effLimArmsJ6}" velocity="${velLimArms}" lower="-${posLimArmsJ6}" upper="${posLimArmsJ6}" />
+  <dynamics damping="${dampArmsJ6}" friction="${fricArmsJ6}"/>
+</joint>
+
+<!-- GripperA -->
+<link name="gripper_A">
+  <inertial>
+    <mass value="${massArmsFlange}"/>
+    <xacro:insert_block name="comArmsFlange" />
+    <xacro:insert_block name="inertiaArmsFlange" />
+  </inertial>
+  <visual>
+    <geometry>
+      <mesh filename="package://cable-suspended-robots-ros-pkg/mesh/cranebot/flange_pilz.stl"/>
+    </geometry>
+  </visual>
+  <collision>
+    <geometry>
+      <mesh filename="package://cable-suspended-robots-ros-pkg/mesh/cranebot/flange_pilz.stl"/>
+    </geometry>
+  </collision>
+</link>
+
+
+<!-- ARMS -->
+<!-- Joint between CraneBot platform and Link1B (first ERB145) -->
+<joint name="platform_erb145_joint_B" type="revolute">
+  <origin rpy="${pi} 0 0" xyz="0 ${off} -${D}"/>
+  <parent link="platform_y"/>
+  <child link="erb145_link1_B"/>
+  <axis xyz="0 0 1"/>
+  <limit effort="${effLimArmsJ1}" velocity="${velLimArms}" lower="-${posLimArmsJ1}" upper="${posLimArmsJ1}" />
+  <dynamics damping="${dampArmsJ1}" friction="${fricArmsJ1}"/>
+</joint>
+
+
+<!-- Link1B (first ERB145) -->
+<link name="erb145_link1_B">
+  <inertial>
+    <mass value="${massArmsLink1}"/>
+    <xacro:insert_block name="comArmsLink1" />
+    <xacro:insert_block name="inertiaArmsLink1" />
+  </inertial>
+  <visual>
+    <geometry>
+      <mesh filename="package://cable-suspended-robots-ros-pkg/mesh/cranebot/link1_pilz.stl"/>
+    </geometry>
+  </visual>
+  <collision>
+    <geometry>
+      <mesh filename="package://cable-suspended-robots-ros-pkg/mesh/cranebot/link1_pilz.stl"/>
+    </geometry>
+  </collision>
+</link>
+
+<!-- Joint between Link1B (first ERB145) and Link2B -->
+<joint name="erb145_link2_joint_B" type="revolute">
+  <origin rpy="${pi/2} 0 0" xyz="0 0 0.0"/>
+  <parent link="erb145_link1_B"/>
+  <child link="link2_B"/>
+  <axis xyz="0 0 1"/>
+  <limit effort="${effLimArmsJ2}" velocity="${velLimArms}" lower="-${posLimArmsJ2}" upper="${posLimArmsJ2}" />
+  <dynamics damping="${dampArmsJ2}" friction="${fricArmsJ2}"/>
+</joint>
+
+<!-- Link2B -->
+<link name="link2_B">
+  <inertial>
+    <mass value="${massArmsLink2}"/>
+    <xacro:insert_block name="comArmsLink2" />
+    <xacro:insert_block name="inertiaArmsLink2" />
+  </inertial>
+  <visual>
+    <geometry>
+      <mesh filename="package://cable-suspended-robots-ros-pkg/mesh/cranebot/link2_pilz.stl"/>
+    </geometry>
+  </visual>
+  <collision>
+    <geometry>
+      <mesh filename="package://cable-suspended-robots-ros-pkg/mesh/cranebot/link2_pilz.stl"/>
+    </geometry>
+  </collision>
+</link>
+
+
+<!-- Joint between Link2B and Link3B (second ERB145) -->
+<joint name="link2_erb145_joint_B" type="revolute">
+  <origin xyz="0 ${L1} 0" rpy="0 ${pi} 0"/>
+  <parent link="link2_B"/>
+  <child link="erb145_link3_B"/>
+  <axis xyz="0 0 1"/>
+  <limit effort="${effLimArmsJ3}" velocity="${velLimArms}" lower="-${posLimArmsJ3}" upper="${posLimArmsJ3}" />
+  <dynamics damping="${dampArmsJ3}" friction="${fricArmsJ3}"/>
+</joint>
+
+<!-- Link3B (second ERB145) -->
+<link name="erb145_link3_B">
+  <inertial>
+    <mass value="${massArmsLink3}"/>
+    <xacro:insert_block name="comArmsLink3" />
+    <xacro:insert_block name="inertiaArmsLink3" />
+  </inertial>
+  <visual>
+    <geometry>
+      <mesh filename="package://cable-suspended-robots-ros-pkg/mesh/cranebot/link3_pilz.stl"/>
+    </geometry>
+  </visual>
+  <collision>
+    <geometry>
+      <mesh filename="package://cable-suspended-robots-ros-pkg/mesh/cranebot/link3_pilz.stl"/>
+    </geometry>
+  </collision>   
+</link>
+
+<!-- Joint between Link3B (second ERB145) and Link4B -->
+<joint name="erb145_link4_joint_B" type="revolute">
+  <origin xyz="0 0 0" rpy="-${pi/2} ${pi} 0" />
+  <parent link="erb145_link3_B"/>
+  <child link="link4_B"/>
+  <axis xyz="0 0 1"/>
+  <limit effort="${effLimArmsJ4}" velocity="${velLimArms}" lower="-${posLimArmsJ4}" upper="${posLimArmsJ4}" />
+  <dynamics damping="${dampArmsJ4}" friction="${fricArmsJ4}"/>
+</joint>
+
+<!-- Link4B -->
+<link name="link4_B">
+  <inertial>
+    <mass value="${massArmsLink4}"/>
+    <xacro:insert_block name="comArmsLink4" />
+    <xacro:insert_block name="inertiaArmsLink4" />
+  </inertial>
+  <visual>
+    <geometry>
+      <mesh filename="package://cable-suspended-robots-ros-pkg/mesh/cranebot/link4_pilz.stl"/>
+    </geometry>
+  </visual>
+  <collision>
+    <geometry>
+      <mesh filename="package://cable-suspended-robots-ros-pkg/mesh/cranebot/link4_pilz.stl"/>
+    </geometry>
+  </collision>
+</link>
+
+<!-- Joint between Link4B and Link5B (ERB115) -->
+<joint name="link4_erb115_joint_B" type="revolute">
+  <origin xyz="0 0 ${L2}" rpy="${pi/2} 0 ${pi}" />
+  <parent link="link4_B"/>
+  <child link="erb115_link5_B"/>
+  <axis xyz="0 0 1"/>
+  <limit effort="${effLimArmsJ5}" velocity="${velLimArms}" lower="-${posLimArmsJ5}" upper="${posLimArmsJ5}" />
+  <dynamics damping="${dampArmsJ5}" friction="${fricArmsJ5}"/>
+</joint>
+
+<!-- Link5B (ERB115) -->
+<link name="erb115_link5_B">
+  <inertial>
+    <mass value="${massArmsLink5}"/>
+    <xacro:insert_block name="comArmsLink5" />
+    <xacro:insert_block name="inertiaArmsLink5" />
+  </inertial>
+  <visual>
+    <geometry>
+      <mesh filename="package://cable-suspended-robots-ros-pkg/mesh/cranebot/link5_pilz.stl"/>
+    </geometry>
+  </visual>
+  <collision>
+    <geometry>
+      <mesh filename="package://cable-suspended-robots-ros-pkg/mesh/cranebot/link5_pilz.stl"/>
+    </geometry>
+  </collision>
+</link>
+
+<!-- Joint between Link5B (ERB115) and GripperB -->
+<joint name="link5_gripper_joint_B" type="revolute">
+  <origin xyz="0 ${L3} 0" rpy="-${pi/2} 0 0" />
+  <parent link="erb115_link5_B"/>
+  <child link="gripper_B"/>
+  <axis xyz="0 0 1"/>
+  <limit effort="${effLimArmsJ6}" velocity="${velLimArms}" lower="-${posLimArmsJ6}" upper="${posLimArmsJ6}" />
+  <dynamics damping="${dampArmsJ6}" friction="${fricArmsJ6}"/>
+</joint>
+
+<!-- GripperB -->
+<link name="gripper_B">
+  <inertial>
+    <mass value="${massArmsFlange}"/>
+    <xacro:insert_block name="comArmsFlange" />
+    <xacro:insert_block name="inertiaArmsFlange" />
+  </inertial>
+  <visual>
+    <geometry>
+      <mesh filename="package://cable-suspended-robots-ros-pkg/mesh/cranebot/flange_pilz.stl"/>
+    </geometry>
+  </visual>
+  <collision>
+    <geometry>
+      <mesh filename="package://cable-suspended-robots-ros-pkg/mesh/cranebot/flange_pilz.stl"/>
+    </geometry>
+  </collision>
+</link>
+
+</robot>

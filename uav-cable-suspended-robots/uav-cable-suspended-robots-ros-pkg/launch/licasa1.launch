@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+
+<!--Convenience launch file to start gazebo + control--> 
+<launch>
+
+	<include file="$(find uav-cable-suspended-robots-ros-pkg)/launch/spawn_licasa1.launch">
+	</include>
+
+	<include file="$(find uav-cable-suspended-robots-ros-pkg)/launch/control_licasa1.launch">
+	</include>
+
+</launch>
