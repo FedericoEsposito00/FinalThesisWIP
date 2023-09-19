@@ -155,51 +155,6 @@
     <xacro:insert_block name="rotor_inertia" />
   </xacro:vertical_rotor>
 
-  <!-- <xacro:vertical_rotor
-    robot_namespace="${namespace}"
-    suffix="right"
-    direction="ccw"
-    motor_constant="${motor_constant}"
-    moment_constant="${moment_constant}"
-    parent="${namespace}/base_link"
-    mass_rotor="${mass_rotor}"
-    radius_rotor="${radius_rotor}"
-    time_constant_up="${time_constant_up}"
-    time_constant_down="${time_constant_down}"
-    max_rot_velocity="${max_rot_velocity}"
-    motor_number="4"
-    rotor_drag_coefficient="${rotor_drag_coefficient}"
-    rolling_moment_coefficient="${rolling_moment_coefficient}"
-    color="Blue"
-    use_own_mesh="false"
-    mesh="">
-    <origin xyz="0 -${arm_length} ${rotor_offset_top}" rpy="0 0 0" />
-    <xacro:insert_block name="rotor_inertia" />
-  </xacro:vertical_rotor>
-
-  <xacro:vertical_rotor
-    robot_namespace="${namespace}"
-    suffix="front_right"
-    direction="cw"
-    motor_constant="${motor_constant}"
-    moment_constant="${moment_constant}"
-    parent="${namespace}/base_link"
-    mass_rotor="${mass_rotor}"
-    radius_rotor="${radius_rotor}"
-    time_constant_up="${time_constant_up}"
-    time_constant_down="${time_constant_down}"
-    max_rot_velocity="${max_rot_velocity}"
-    motor_number="5"
-    rotor_drag_coefficient="${rotor_drag_coefficient}"
-    rolling_moment_coefficient="${rolling_moment_coefficient}"
-    color="Red"
-    use_own_mesh="false"
-    mesh="">
-    <origin xyz="${cos30*arm_length} -${sin30*arm_length} ${rotor_offset_top}" rpy="0 0 0" />
-    <xacro:insert_block name="rotor_inertia" />
-  </xacro:vertical_rotor> -->
-
-
   <!-- Import Transmissions -->
   <xacro:include filename="$(find uav-cable-suspended-robots-ros-pkg)/urdf/licasa1.transmission.xacro" />
   <xacro:LiCAS_A1_transmission name="LiCAS_A1" hardware_interface1="hardware_interface/PositionJointInterface" hardware_interface2="hardware_interface/EffortJointInterface" /> 

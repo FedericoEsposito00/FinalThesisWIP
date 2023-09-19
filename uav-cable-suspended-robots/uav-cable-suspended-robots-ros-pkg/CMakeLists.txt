@@ -147,14 +147,8 @@ include
 add_executable(UnforcedOscillationLicas_uav src/UnforcedOscillationLicas.cpp)
 add_executable(UnforcedOscillationCranebot_uav src/UnforcedOscillationCranebot.cpp)
 add_executable(ArmsInducedOscillationCranebot_uav src/ArmsInducedOscillationCranebot.cpp src/trajectoryGeneration.cpp)
-add_executable(LeftArmControl_uav src/LeftArmControl.cpp)
-add_executable(RightArmControl_uav src/RightArmControl.cpp)
-add_executable(1LeftArmControl_uav src/1LeftArmControl.cpp)
-add_executable(2RightArmControl_uav src/2RightArmControl.cpp)
 add_executable(JoyWrap_uav src/JoyWrap.cpp)
-add_executable(VelJoyWrap_uav src/VelJoyWrap.cpp)
 add_executable(BoundedJoyWrap_uav src/BoundedJoyWrap.cpp)
-add_executable(Ctrl_uav src/Ctrl.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -174,14 +168,8 @@ add_executable(Ctrl_uav src/Ctrl.cpp)
 target_link_libraries(UnforcedOscillationLicas_uav ${catkin_LIBRARIES})
 target_link_libraries(UnforcedOscillationCranebot_uav ${catkin_LIBRARIES})
 target_link_libraries(ArmsInducedOscillationCranebot_uav ${catkin_LIBRARIES} ${Eigen3_LIBRARIES})
-target_link_libraries(LeftArmControl_uav ${catkin_LIBRARIES})
-target_link_libraries(RightArmControl_uav ${catkin_LIBRARIES})
-target_link_libraries(1LeftArmControl_uav ${catkin_LIBRARIES})
-target_link_libraries(2RightArmControl_uav ${catkin_LIBRARIES})
 target_link_libraries(JoyWrap_uav ${catkin_LIBRARIES})
-target_link_libraries(VelJoyWrap_uav ${catkin_LIBRARIES})
 target_link_libraries(BoundedJoyWrap_uav ${catkin_LIBRARIES})
-target_link_libraries(Ctrl_uav ${catkin_LIBRARIES})
 
 #############
 ## Install ##
