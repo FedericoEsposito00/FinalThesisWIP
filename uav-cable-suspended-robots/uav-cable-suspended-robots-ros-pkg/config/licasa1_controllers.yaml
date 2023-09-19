@@ -46,12 +46,12 @@
   licasa1_leftarm_3_effort_pos_controller:
     type: effort_controllers/JointPositionController
     joint: LiCAS_A1_q1_3
-    pid: {p: 10, i: 0, d: 0.01}
+    pid: {p: 15, i: 0, d: 0.01}
 
   licasa1_leftarm_4_effort_pos_controller:
     type: effort_controllers/JointPositionController
     joint: LiCAS_A1_q1_4
-    pid: {p: 40, i: 0, d: 0.01}
+    pid: {p: 30, i: 0, d: 0.01}
 
   licasa1_rightarm_1_effort_pos_controller:
     type: effort_controllers/JointPositionController
@@ -66,9 +66,9 @@
   licasa1_rightarm_3_effort_pos_controller:
     type: effort_controllers/JointPositionController
     joint: LiCAS_A1_q2_3
-    pid: {p: 10, i: 0, d: 0.01}
+    pid: {p: 15, i: 0, d: 0.01}
 
   licasa1_rightarm_4_effort_pos_controller:
     type: effort_controllers/JointPositionController
     joint: LiCAS_A1_q2_4
-    pid: {p: 40, i: 0, d: 0.01}
+    pid: {p: 30, i: 0, d: 0.01}
