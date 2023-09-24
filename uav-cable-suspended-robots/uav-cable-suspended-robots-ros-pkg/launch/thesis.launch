@@ -14,5 +14,7 @@
 	<node name="CLIK_node" pkg="clik_pkg" type="CLIK_node" output="screen"/>
 
 	<node name="JoyWrap_uav" pkg="uav-cable-suspended-robots-ros-pkg" type="JoyWrap_uav" output="screen"/>
+	
+    	<node pkg="tf" type="static_transform_publisher" name="ENU_to_NED" args="0 0 0 0 0 3.14 licasa1/base_link licasa1/NED_frame 100" />
 
 </launch>
