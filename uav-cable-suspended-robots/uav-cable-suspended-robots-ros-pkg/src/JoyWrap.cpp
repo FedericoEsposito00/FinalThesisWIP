@@ -38,6 +38,7 @@ JOY_WRAP::JOY_WRAP(): _rate(RATE) {
 	tf::StampedTransform right_eef;
 	
 	cout<<"Waiting until the initial position is reached\n";
+	//ADD ACTUAL WAIT OF CLIK NODE
 	sleep(20);
 	
 	while (!listener.waitForTransform("shoulder_link_y", "left_eef_link", ros::Time(0), ros::Duration(1)) || !listener.waitForTransform("world", "right_eef_link", ros::Time(0), ros::Duration(1))) {
