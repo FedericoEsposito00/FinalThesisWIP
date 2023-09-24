@@ -105,7 +105,7 @@ JOY_WRAP::JOY_WRAP(): _rate(RATE_CTRL) {
 
 	//Retrieve the robot description (URDF) from the robot_description param
 	std::string robot_desc_string;
-	_nh.param("/licasa1/robot_description", robot_desc_string, std::string());
+	_nh.param("robot_description", robot_desc_string, std::string());
 
 	//Use the treeFromString function to convert the robot model into a kinematic tree 
 	if (!kdl_parser::treeFromString(robot_desc_string, _k_tree)){
@@ -192,30 +192,20 @@ void JOY_WRAP::pub_ref() {
 
 		right_err = _right_ik_solver_pos->CartToJnt(*_right_q_in, F_dest, right_q_out);
 
-		// if (right_q_out(0) < right_q_min0 || right_q_out(0) > right_q_max0 || right_q_out(1) < right_q_min1 || right_q_out(1) > right_q_max1 || right_q_out(2) < right_q_min2 || right_q_out(2) > right_q_max2 || right_q_out(3) < right_q_min3 || right_q_out(3) > right_q_max3) {
-		// 	right_err = -6;
-		// 	cout<<"RIGHT JOINTS RANGE EXCEEDED\n";
-		// 	cout<<right_q_out(0)<<endl<<right_q_out(1)<<endl<<right_q_out(2)<<endl<<right_q_out(3)<<endl;
-		// }
-
-		if (abs(right_q_out(3)) < 0.05) {
+		if (right_q_out(0) < right_q_min0 || right_q_out(0) > right_q_max0 || right_q_out(1) < right_q_min1 || right_q_out(1) > right_q_max1 || right_q_out(2) < right_q_min2 || right_q_out(2) > right_q_max2 || right_q_out(3) < right_q_min3 || right_q_out(3) > right_q_max3) {
 			right_err = -6;
-			cout<<"RIGHT SINGULARITY\n";
+			cout<<"RIGHT JOINTS RANGE EXCEEDED\n";
+			cout<<right_q_out(0)<<endl<<right_q_out(1)<<endl<<right_q_out(2)<<endl<<right_q_out(3)<<endl;
 		}
 
 		F_dest.p.data[1] = y+L_half;
 
 		left_err = _left_ik_solver_pos->CartToJnt(*_left_q_in, F_dest, left_q_out);
 
-		// if (left_q_out(0) < left_q_min0 || left_q_out(0) > left_q_max0 || left_q_out(1) < left_q_min1 || left_q_out(1) > left_q_max1 || left_q_out(2) < left_q_min2 || left_q_out(2) > left_q_max2 || left_q_out(3) < left_q_min3 || left_q_out(3) > left_q_max3) {
-		// 	left_err = -6;
-		// 	cout<<"LEFT JOINTS RANGE EXCEEDED\n";
-		// 	cout<<left_q_out(0)<<endl<<left_q_out(1)<<endl<<left_q_out(2)<<endl<<left_q_out(3)<<endl;
-		// }
-
-		if (abs(left_q_out(3)) < 0.05) {
+		if (left_q_out(0) < left_q_min0 || left_q_out(0) > left_q_max0 || left_q_out(1) < left_q_min1 || left_q_out(1) > left_q_max1 || left_q_out(2) < left_q_min2 || left_q_out(2) > left_q_max2 || left_q_out(3) < left_q_min3 || left_q_out(3) > left_q_max3) {
 			left_err = -6;
-			cout<<"LEFT SINGULARITY\n";
+			cout<<"LEFT JOINTS RANGE EXCEEDED\n";
+			cout<<left_q_out(0)<<endl<<left_q_out(1)<<endl<<left_q_out(2)<<endl<<left_q_out(3)<<endl;
 		}
 
 		if((right_err != KDL::SolverI::E_NOERROR || left_err != KDL::SolverI::E_NOERROR) && !_override) {

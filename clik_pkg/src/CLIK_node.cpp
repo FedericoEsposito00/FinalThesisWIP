@@ -213,9 +213,8 @@ void CLIK_NODE::ctrl_loop() {
 	// string ln;
 	// getline(cin, ln);
 
-    cout << "Waiting 10 seconds, then starting the trajectory execution" << endl;
-    //ADD WAIT FOR THE CONTROLLERS
-    sleep(10);
+    cout << "Waiting 5 seconds, then starting the trajectory execution" << endl;
+    sleep(5);
 
     goto_initial_position(left_i_cmd, right_i_cmd);
     cout<<"Initial position reached\n";

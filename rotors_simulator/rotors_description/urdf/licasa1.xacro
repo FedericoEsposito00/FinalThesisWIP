@@ -109,7 +109,7 @@
     color="Blue"
     use_own_mesh="false"
     mesh="">
-    <origin xyz="0 -${arm_length} ${rotor_offset_top}" rpy="0 0 0" />
+    <origin xyz="0 ${arm_length} ${rotor_offset_top}" rpy="0 0 0" />
     <xacro:insert_block name="rotor_inertia" />
   </xacro:vertical_rotor>
 
@@ -127,7 +127,7 @@
     motor_number="2"
     rotor_drag_coefficient="${rotor_drag_coefficient}"
     rolling_moment_coefficient="${rolling_moment_coefficient}"
-    color="Green"
+    color="Blue"
     use_own_mesh="false"
     mesh="">
     <origin xyz="-${arm_length} 0 ${rotor_offset_top}" rpy="0 0 0" />
@@ -148,10 +148,10 @@
     motor_number="3"
     rotor_drag_coefficient="${rotor_drag_coefficient}"
     rolling_moment_coefficient="${rolling_moment_coefficient}"
-    color="Yellow"
+    color="Blue"
     use_own_mesh="false"
     mesh="">
-    <origin xyz="0 ${arm_length} ${rotor_offset_top}" rpy="0 0 0" />
+    <origin xyz="0 -${arm_length} ${rotor_offset_top}" rpy="0 0 0" />
     <xacro:insert_block name="rotor_inertia" />
   </xacro:vertical_rotor>
 
@@ -313,12 +313,12 @@
         <mesh filename="package://uav-cable-suspended-robots-ros-pkg/mesh/licas/Shoulder_Pitch_Structure.dae" scale=".001 .001 .001"/>
       </geometry>
     </visual>
-    <!-- <collision>
+    <collision>
       <origin xyz="0 0 0"/>
       <geometry>
         <mesh filename="package://uav-cable-suspended-robots-ros-pkg/mesh/licas/Shoulder_Pitch_Structure.dae" scale=".001 .001 .001"/>
       </geometry>
-    </collision> -->
+    </collision>
   </link>
   
   
@@ -344,12 +344,12 @@
         <mesh filename="package://uav-cable-suspended-robots-ros-pkg/mesh/licas/Shoulder_Roll_Structure_Left.dae" scale=".001 .001 .001"/>
       </geometry>
     </visual>
-    <!-- <collision>
+    <collision>
       <origin xyz="0 0.04 0"/>
       <geometry>
         <mesh filename="package://uav-cable-suspended-robots-ros-pkg/mesh/licas/Shoulder_Roll_Structure_Left.dae" scale=".001 .001 .001"/>
       </geometry>
-    </collision> -->
+    </collision>
   </link>
   
   
@@ -374,12 +374,12 @@
         <mesh filename="package://uav-cable-suspended-robots-ros-pkg/mesh/licas/Assembly_Shoulder_Yaw_Structure.dae" scale=".001 .001 .001"/>
       </geometry>
     </visual>
-    <!-- <collision>
+    <collision>
       <origin xyz="0 0 0"/>
       <geometry>
         <mesh filename="package://uav-cable-suspended-robots-ros-pkg/mesh/licas/Assembly_Shoulder_Yaw_Structure.dae" scale=".001 .001 .001"/>
       </geometry>
-    </collision> -->
+    </collision>
   </link> 
   
   
@@ -404,12 +404,12 @@
         <mesh filename="package://uav-cable-suspended-robots-ros-pkg/mesh/licas/Elbow_Pitch_Structure_Left_Cut.dae" scale=".001 .001 .001"/>
       </geometry>
     </visual>
-    <!-- <collision>
+    <collision>
       <origin xyz="0 0 -0.132"/>
       <geometry>
         <mesh filename="package://uav-cable-suspended-robots-ros-pkg/mesh/licas/Elbow_Pitch_Structure_Left_Cut.dae" scale=".001 .001 .001"/>
       </geometry>
-    </collision> -->
+    </collision>
   </link>
   
   
@@ -434,12 +434,12 @@
         <mesh filename="package://uav-cable-suspended-robots-ros-pkg/mesh/licas/Forearm_Link_with_Gripper_Servo.dae" scale=".001 .001 .001"/>
       </geometry>
     </visual>
-    <!-- <collision>
+    <collision>
       <origin xyz="0 0 0"/>
       <geometry>
         <mesh filename="package://uav-cable-suspended-robots-ros-pkg/mesh/licas/Forearm_Link_with_Gripper_Servo.dae" scale=".001 .001 .001"/>
       </geometry>
-    </collision> -->
+    </collision>
   </link> 
   
   
@@ -465,12 +465,12 @@
         <mesh filename="package://uav-cable-suspended-robots-ros-pkg/mesh/licas/Shoulder_Roll_Structure_Right.dae" scale=".001 .001 .001"/>
       </geometry>
     </visual>
-    <!-- <collision>
+    <collision>
       <origin xyz="0 -0.04 0"/>
       <geometry>
         <mesh filename="package://uav-cable-suspended-robots-ros-pkg/mesh/licas/Shoulder_Roll_Structure_Right.dae" scale=".001 .001 .001"/>
       </geometry>
-    </collision> -->
+    </collision>
   </link>
   
   
@@ -495,12 +495,12 @@
         <mesh filename="package://uav-cable-suspended-robots-ros-pkg/mesh/licas/Assembly_Shoulder_Yaw_Structure.dae" scale=".001 .001 .001"/>
       </geometry>
     </visual>
-    <!-- <collision>
+    <collision>
       <origin xyz="0 0 0"/>
       <geometry>
         <mesh filename="package://uav-cable-suspended-robots-ros-pkg/mesh/licas/Assembly_Shoulder_Yaw_Structure.dae" scale=".001 .001 .001"/>
       </geometry>
-    </collision> -->
+    </collision>
   </link> 
   
   
@@ -525,12 +525,12 @@
         <mesh filename="package://uav-cable-suspended-robots-ros-pkg/mesh/licas/Elbow_Pitch_Structure_Right_Cut.dae" scale=".001 .001 .001"/>
       </geometry>
     </visual>
-    <!-- <collision>
+    <collision>
       <origin xyz="0 0 -0.132"/>
       <geometry>
         <mesh filename="package://uav-cable-suspended-robots-ros-pkg/mesh/licas/Elbow_Pitch_Structure_Right_Cut.dae" scale=".001 .001 .001"/>
       </geometry>
-    </collision> -->
+    </collision>
   </link>
   
   
@@ -555,12 +555,12 @@
         <mesh filename="package://uav-cable-suspended-robots-ros-pkg/mesh/licas/Forearm_Link_with_Gripper_Servo.dae" scale=".001 .001 .001"/>
       </geometry>
     </visual>
-    <!-- <collision>
+    <collision>
       <origin xyz="0 0 0"/>
       <geometry>
         <mesh filename="package://uav-cable-suspended-robots-ros-pkg/mesh/licas/Forearm_Link_with_Gripper_Servo.dae" scale=".001 .001 .001"/>
       </geometry>
-    </collision> -->
+    </collision>
   </link>
   
   <!-- END EFFECTORS -->
