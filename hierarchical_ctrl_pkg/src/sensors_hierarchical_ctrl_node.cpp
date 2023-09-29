@@ -15,12 +15,11 @@
 #include <std_msgs/Float64.h>
 #include <ros/package.h>
 #include "nav_msgs/Odometry.h"
+#include "std_msgs/Float64MultiArray.h"
 #include "sensor_msgs/Imu.h"
 #include "Eigen/Dense"
 
-//Include Tf libraries
-#include "tf/transform_broadcaster.h"
-#include "tf/transform_listener.h"
+//Include quaternion
 #include <tf2/LinearMath/Quaternion.h>
 
 //Include Simulink-generated library
@@ -37,6 +36,7 @@ class HC_NODE {
 
         void odom_callback(nav_msgs::Odometry odom);
 		void imu_callback(sensor_msgs::Imu imu);
+        void ref_callback(std_msgs::Float64MultiArray ref);
 
         void ctrl_loop();
         void run();
@@ -77,6 +77,7 @@ class HC_NODE {
         // control flags
         bool _first_odom;
         bool _first_imu;
+        bool _first_ref;
 
         // Controller and Estimator outputs
         double estimate[6];
@@ -87,10 +88,6 @@ class HC_NODE {
 		ros::Publisher _motor_speed_pub;
         ros::Subscriber _odom_sub;
         ros::Subscriber _imu_sub;
-
-        // TF objects
-        tf::TransformListener _listener;
-        tf::StampedTransform _tf_body;
 
 };
 
@@ -128,6 +125,7 @@ HC_NODE::HC_NODE() {
     // flag initialization
     _first_imu = false;
 	_first_odom = false;
+    _first_ref = false;
 
     // output initialization
     estimate[0] = estimate[1] = estimate[2] = estimate[3] = estimate[4] = estimate[5] = 0;
@@ -173,6 +171,14 @@ void HC_NODE::odom_callback(nav_msgs::Odometry odom) {
 	_p_b_dot = _Rb*_R_enu2ned*vel_b_enu;  				//transform in world-NED frame (first in body-NED then in world-NED)	
 	
 	_first_odom = true;
+}
+
+void HC_NODE::ref_callback(std_msgs::Float64MultiArray ref) {
+	//reads reference
+
+
+	
+	_first_ref = true;
 }
 
 void HC_NODE::imu_callback (sensor_msgs::Imu imu){
@@ -280,11 +286,14 @@ void HC_NODE::ctrl_loop() {
         cmd.angular_velocities.push_back(2620);
     }
 
-    // 5 seconds of open loop for the lift off
+    // 4 seconds of open loop for the lift off
     // the estimator runs during this phase
     cout<<"OPEN LOOP START\n";
+
+    // cout<<"Start position: "<<_p_b<<endl<<"Start orientation: "<<_eta_b<<endl;
+
     double time = 0;
-    while (time < 5) {
+    while (time < 4) {
         _motor_speed_pub.publish(cmd);
 
         est.rtU.eta[0] = _eta_b(0);
@@ -317,6 +326,8 @@ void HC_NODE::ctrl_loop() {
     }
 
     cout<<"OPEN LOOP END\n";
+
+    // cout<<"End position: "<<_p_b<<endl<<"End orientation: "<<_eta_b<<endl;
 
     while(ros::ok()) {
 
@@ -413,6 +424,16 @@ void HC_NODE::ctrl_loop() {
         for (int i = 0; i<6; i++) {
             cout<<est.rtY.estimate[i]<<endl;
         }
+
+        // cout<<"eta_d_dot: \n";
+        // for (int i = 0; i<3; i++) {
+        //     cout<<rtObj.rtY.eta_d_dot[i]<<endl;
+        // }
+
+        // cout<<"eta_d_ddot: \n";
+        // for (int i = 0; i<3; i++) {
+        //     cout<<rtObj.rtY.eta_d_ddot[i]<<endl;
+        // }
 
         // cout<<"Q: \n";
         // for (int i = 0; i<3; i++) {

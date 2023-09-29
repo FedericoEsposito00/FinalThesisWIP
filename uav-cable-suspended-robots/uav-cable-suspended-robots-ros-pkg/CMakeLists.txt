@@ -149,6 +149,7 @@ add_executable(UnforcedOscillationCranebot_uav src/UnforcedOscillationCranebot.c
 add_executable(ArmsInducedOscillationCranebot_uav src/ArmsInducedOscillationCranebot.cpp src/trajectoryGeneration.cpp)
 add_executable(JoyWrap_uav src/JoyWrap.cpp)
 add_executable(BoundedJoyWrap_uav src/BoundedJoyWrap.cpp)
+add_executable(SensorFilter_uav src/SensorFilter.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -170,6 +171,7 @@ target_link_libraries(UnforcedOscillationCranebot_uav ${catkin_LIBRARIES})
 target_link_libraries(ArmsInducedOscillationCranebot_uav ${catkin_LIBRARIES} ${Eigen3_LIBRARIES})
 target_link_libraries(JoyWrap_uav ${catkin_LIBRARIES})
 target_link_libraries(BoundedJoyWrap_uav ${catkin_LIBRARIES})
+target_link_libraries(SensorFilter_uav ${catkin_LIBRARIES})
 
 #############
 ## Install ##

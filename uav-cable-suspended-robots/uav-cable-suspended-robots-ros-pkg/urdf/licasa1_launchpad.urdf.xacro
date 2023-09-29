@@ -1,0 +1,140 @@
+<?xml version="1.0"?>
+
+<!-- Robot Name --> 
+<robot name="LiCAS_A1_launchpad" xmlns:xacro="http://ros.org/wiki/xacro">
+
+<!-- LAUNCHPAD -->
+
+  <link name="world" />
+  
+  <joint name="left_launchpad_joint" type="fixed">
+    <origin xyz="0 1 1"/>
+    <parent link="world"/>
+    <child link="left_launchpad"/>
+  </joint>
+  
+  <link name="left_launchpad">
+    <inertial>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <mass value="1e3" />
+      <inertia ixx="1e-03" ixy="0.0" ixz="0.0" iyy="1e-03" iyz="0.0" izz="1e-03"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0"/> 
+      <geometry>
+	      <box size="0.15 0.15 2"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0"/> 
+      <geometry>
+	      <box size="0.15 0.15 2"/>
+      </geometry>
+    </collision>
+  </link> 
+
+  <joint name="left_launchpad_top_joint" type="fixed">
+    <origin xyz="0 0 1"/>
+    <parent link="left_launchpad"/>
+    <child link="left_launchpad_top"/>
+  </joint>
+  
+  <link name="left_launchpad_top">
+    <inertial>
+      <origin rpy="0 0 0" xyz="0 -0.3 0"/>
+      <mass value="1e3" />
+      <inertia ixx="1e-03" ixy="0.0" ixz="0.0" iyy="1e-03" iyz="0.0" izz="1e-03"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 -0.4 0"/> 
+      <geometry>
+	      <box size="0.3 1 0.01"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 -0.4 0"/> 
+      <geometry>
+	      <box size="0.3 1 0.01"/>
+      </geometry>
+    </collision>
+  </link> 
+
+  <joint name="right_launchpad_joint" type="fixed">
+    <origin xyz="0 -1 1"/>
+    <parent link="world"/>
+    <child link="right_launchpad"/>
+  </joint>
+  
+  <link name="right_launchpad">
+    <inertial>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <mass value="1e3" />
+      <inertia ixx="1e-03" ixy="0.0" ixz="0.0" iyy="1e-03" iyz="0.0" izz="1e-03"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0"/> 
+      <geometry>
+	<box size="0.15 0.15 2"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0"/> 
+      <geometry>
+	<box size="0.15 0.15 2"/>
+      </geometry>
+    </collision>
+  </link> 
+
+  <joint name="right_launchpad_top_joint" type="fixed">
+    <origin xyz="0 0 1"/>
+    <parent link="right_launchpad"/>
+    <child link="right_launchpad_top"/>
+  </joint>
+  
+  <link name="right_launchpad_top">
+    <inertial>
+      <origin rpy="0 0 0" xyz="0 0.3 0"/>
+      <mass value="1e3" />
+      <inertia ixx="1e-03" ixy="0.0" ixz="0.0" iyy="1e-03" iyz="0.0" izz="1e-03"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0.4 0"/> 
+      <geometry>
+	      <box size="0.3 1 0.01"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0.4 0"/> 
+      <geometry>
+	      <box size="0.3 1 0.01"/>
+      </geometry>
+    </collision>
+  </link> 
+
+  <!-- <joint name="sensor_wall_base_joint" type="fixed">
+    <origin xyz="2.5 0 0.05"/>
+    <parent link="world"/>
+    <child link="sensor_wall_base"/>
+  </joint> 
+  
+  <link name="sensor_wall_base">
+    <inertial>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <mass value="1e3" />
+      <inertia ixx="10" ixy="0.0" ixz="0.0" iyy="10" iyz="0.0" izz="10"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0"/> 
+      <geometry>
+	      <box size="1 1.2 0.1"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0"/> 
+      <geometry>
+	      <box size="1 1.2 0.1"/>
+      </geometry>
+    </collision>
+  </link>  -->
+
+</robot>

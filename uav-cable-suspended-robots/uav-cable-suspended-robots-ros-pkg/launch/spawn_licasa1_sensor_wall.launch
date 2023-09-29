@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launch>
+
+    <!-- Robot -->	
+    <param name="robot_description_sensor_wall" command=" xacro '$(find uav-cable-suspended-robots-ros-pkg)/urdf/licasa1_sensor_wall.urdf.xacro'" />
+    <node name="licasa1_sensor_wall_spawn" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen"
+		  args="-param robot_description_sensor_wall
+		  -urdf 
+		  -model sensor_wall" />
+
+    <!-- <node name="licasa1_sensor_wall_spawn" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen"
+		  args="-param robot_description_sensor_wall
+		  -urdf 
+          -x 2.5
+          -y 0.0
+          -z 1.0
+		  -model sensor_wall" /> -->
+
+    <!-- <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" /> -->
+
+    <!-- <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher"/> -->
+          
+</launch>

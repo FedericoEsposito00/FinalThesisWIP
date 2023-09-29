@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launch>
+
+    <!-- Robot -->	
+    <param name="robot_description_launchpad" command=" xacro '$(find uav-cable-suspended-robots-ros-pkg)/urdf/licasa1_launchpad.urdf.xacro'" />
+    <node name="licasa1_launchpad_spawn" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen"
+		  args="-param robot_description_launchpad
+		  -urdf 
+		  -model launchpad" />
+    <!-- <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" /> -->
+
+    <!-- <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher"/> -->
+          
+</launch>

@@ -7,9 +7,9 @@
 //
 // Code generated for Simulink model 'HierarchicalControl'.
 //
-// Model version                  : 4.31
+// Model version                  : 4.35
 // Simulink Coder version         : 9.8 (R2022b) 13-May-2022
-// C/C++ source code generated on : Sat Sep 23 19:59:40 2023
+// C/C++ source code generated on : Tue Sep 26 09:08:47 2023
 //
 // Target selection: ert.tlc
 // Embedded hardware selection: Intel->x86-64 (Linux 64)
@@ -30,23 +30,23 @@ const HierarchicalControl::ConstP rtConstP{
   // Expression: Ke
   //  Referenced by: '<S2>/Inner-loop control'
 
-  { 50.0, 0.0, 0.0, 0.0, 50.0, 0.0, 0.0, 0.0, 25.0, 10.0, 0.0, 0.0, 0.0, 10.0,
+  { 100.0, 0.0, 0.0, 0.0, 100.0, 0.0, 0.0, 0.0, 50.0, 10.0, 0.0, 0.0, 0.0, 10.0,
     0.0, 0.0, 0.0, 5.0 },
 
   // Expression: Ki_ang
   //  Referenced by: '<S2>/Inner-loop control'
 
-  { 0.1, 0.0, 0.0, 0.0, 0.1, 0.0, 0.0, 0.0, 0.05 },
+  { 1, 0.0, 0.0, 0.0, 1, 0.0, 0.0, 0.0, 1 },
 
   // Expression: Ki
   //  Referenced by: '<S1>/Outer-loop control'
 
-  { 0.1, 0.0, 0.0, 0.0, 0.1, 0.0, 0.0, 0.0, 0.1 },
+  { 1, 0.0, 0.0, 0.0, 1, 0.0, 0.0, 0.0, 1 },
 
   // Expression: Kp
   //  Referenced by: '<S1>/Outer-loop control'
 
-  { 2.0, 0.0, 0.0, 0.0, 2.0, 0.0, 0.0, 0.0, 2.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0,
+  { 5.0, 0.0, 0.0, 0.0, 5.0, 0.0, 0.0, 0.0, 5.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0,
     0.0, 0.0, 1.0 }
 };
 
