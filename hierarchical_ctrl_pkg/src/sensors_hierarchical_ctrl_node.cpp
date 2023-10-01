@@ -86,8 +86,10 @@ class HC_NODE {
 
         // ROS topic objects
 		ros::Publisher _motor_speed_pub;
+        ros::Publisher _x_estimate_pub;
         ros::Subscriber _odom_sub;
         ros::Subscriber _imu_sub;
+        ros::Subscriber _ref_sub;
 
 };
 
@@ -95,9 +97,11 @@ HC_NODE::HC_NODE() {
 
     // ROS topic initialization
     _motor_speed_pub = _nh.advertise< mav_msgs::Actuators > ("/licasa1/command/motor_speed", 1);
+    _x_estimate_pub = _nh.advertise< std_msgs::Float64 > ("/licasa1/x_estimate", 1);
 
     _odom_sub = _nh.subscribe("/licasa1/ground_truth/odometry", 0, &HC_NODE::odom_callback, this);	
 	_imu_sub = _nh.subscribe("/licasa1/ground_truth/imu", 0, &HC_NODE::imu_callback, this);	
+    _ref_sub = _nh.subscribe("/licasa1/ref_topic", 0, &HC_NODE::ref_callback, this);	
 
     // array initialization
     _pos_ref(0) = _pos_ref(1) = _pos_ref(2) = 0;
@@ -174,10 +178,23 @@ void HC_NODE::odom_callback(nav_msgs::Odometry odom) {
 }
 
 void HC_NODE::ref_callback(std_msgs::Float64MultiArray ref) {
-	//reads reference
-
-
 	
+    //reads reference
+    _pos_ref(0) = ref.data[0];
+    _pos_ref(1) = ref.data[1];
+    _pos_ref(2) = ref.data[2];
+    psi_d = ref.data[3];
+
+    _pos_ref_dot(0) = ref.data[4];
+    _pos_ref_dot(1) = ref.data[5];
+    _pos_ref_dot(2) = ref.data[6];
+    dot_psi_d = ref.data[7];
+
+    _pos_ref_dot_dot(0) = ref.data[8];
+    _pos_ref_dot_dot(1) = ref.data[9];
+    _pos_ref_dot_dot(2) = ref.data[10];
+    ddot_psi_d = ref.data[11];
+
 	_first_ref = true;
 }
 
@@ -225,54 +242,6 @@ void HC_NODE::imu_callback (sensor_msgs::Imu imu){
 void HC_NODE::ctrl_loop() {
     ros::Rate r(RATE);
 
-    // read reference values from file
-	ifstream ref;
-
-	string pkg_loc = ros::package::getPath("hierarchical_ctrl_pkg");
-	ref.open(pkg_loc + "/UAV.txt", ios::in); 
-
-	if (!ref.is_open()) {
-		cout<<"Error opening the file!";
-		exit(1);
-	}
-
-	//trajectory length
-	int N;
-	ref>>N;
-
-	double* P_x = new double[N];
-	double* P_y = new double[N];
-	double* P_z = new double[N];
-    double* P_psi = new double[N];
-	double* P_d_x = new double[N];
-	double* P_d_y = new double[N];
-	double* P_d_z = new double[N];
-    double* P_d_psi = new double[N];
-	double* P_dd_x = new double[N];
-	double* P_dd_y = new double[N];
-	double* P_dd_z = new double[N];
-    double* P_dd_psi = new double[N];
-
-	for (int i = 0; i<N; i++) {
-		ref>>P_x[i];
-		ref>>P_y[i];
-		ref>>P_z[i];
-        ref>>P_psi[i];
-		ref>>P_d_x[i];
-		ref>>P_d_y[i];
-		ref>>P_d_z[i];
-        ref>>P_d_psi[i];
-		ref>>P_dd_x[i];
-		ref>>P_dd_y[i];
-		ref>>P_dd_z[i];
-        ref>>P_dd_psi[i];
-	}
-
-	ref.close();
-
-    // Index for the trajectory vectors
-    int ii = 0;
-
     // Waiting for the first imu and odom
     while (_first_imu == false || _first_odom == false) {
         cout<<"Waiting for sensors\n";
@@ -289,6 +258,8 @@ void HC_NODE::ctrl_loop() {
     // 4 seconds of open loop for the lift off
     // the estimator runs during this phase
     cout<<"OPEN LOOP START\n";
+
+    std_msgs::Float64 x_est;
 
     // cout<<"Start position: "<<_p_b<<endl<<"Start orientation: "<<_eta_b<<endl;
 
@@ -321,8 +292,33 @@ void HC_NODE::ctrl_loop() {
         }
         cout<<endl;
 
+        x_est.data = estimate[0];
+
+        _x_estimate_pub.publish(x_est);
+
         time = time + 1.0/RATE;
         r.sleep();
+    }
+
+    // ref values initialized to the current position, in case the ref topic isn't active yet
+    if (!_first_ref) {
+        cout<<"HOVERING\n";
+        _pos_ref(0) = _p_b(0);
+        _pos_ref(1) = _p_b(1);
+        _pos_ref(2) = _p_b(2);
+        psi_d = _eta_b(2);
+
+        _pos_ref_dot(0) = _p_b_dot(0);
+        _pos_ref_dot(1) = _p_b_dot(1);
+        _pos_ref_dot(2) = _p_b_dot(2);
+        dot_psi_d = _eta_b_dot(2);
+
+        _pos_ref_dot_dot(0) = 0;
+        _pos_ref_dot_dot(1) = 0;
+        _pos_ref_dot_dot(2) = 0;
+        ddot_psi_d = 0;
+    } else {
+        cout<<"FOLLOWING TRAJECTORY\n";
     }
 
     cout<<"OPEN LOOP END\n";
@@ -330,22 +326,6 @@ void HC_NODE::ctrl_loop() {
     // cout<<"End position: "<<_p_b<<endl<<"End orientation: "<<_eta_b<<endl;
 
     while(ros::ok()) {
-
-        // current reference values saved in the correct arrays
-        _pos_ref(0) = P_x[ii];
-        _pos_ref(1) = P_y[ii];
-        _pos_ref(2) = P_z[ii];
-        psi_d = P_psi[ii];
-
-        _pos_ref_dot(0) = P_d_x[ii];
-        _pos_ref_dot(1) = P_d_y[ii];
-        _pos_ref_dot(2) = P_d_z[ii];
-        dot_psi_d = P_d_psi[ii];
-
-        _pos_ref_dot_dot(0) = P_dd_x[ii];
-        _pos_ref_dot_dot(1) = P_dd_y[ii];
-        _pos_ref_dot_dot(2) = P_dd_z[ii];
-        ddot_psi_d = P_dd_psi[ii];
 
         // Estimator input
         for (int i = 0; i < 3; i++) {
@@ -440,12 +420,16 @@ void HC_NODE::ctrl_loop() {
         //     cout<<rtObj.rtY.Q[3*i]<<" "<<rtObj.rtY.Q[3*i+1]<<" "<<rtObj.rtY.Q[3*i+2]<<endl;
         // }
 
-        cout<<"speeds published\n\n";
+        // cout<<"speeds published\n\n";
 
-        if (ii < N-1) {
-            ii++;
-        }
+        // if (ii < N-1) {
+        //     ii++;
+        // }
 
+        x_est.data = estimate[0];
+        _x_estimate_pub.publish(x_est);
+
+        time = time + 1.0/RATE;
 		r.sleep();
 	}
 
