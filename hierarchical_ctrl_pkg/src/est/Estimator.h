@@ -7,9 +7,9 @@
 //
 // Code generated for Simulink model 'Estimator'.
 //
-// Model version                  : 4.31
+// Model version                  : 4.37
 // Simulink Coder version         : 9.8 (R2022b) 13-May-2022
-// C/C++ source code generated on : Sat Sep 23 20:01:35 2023
+// C/C++ source code generated on : Mon Oct  2 15:20:27 2023
 //
 // Target selection: ert.tlc
 // Embedded hardware selection: Intel->x86-64 (Linux 64)
@@ -39,8 +39,6 @@ class Estimator final
   // Block signals and states (default storage) for system '<Root>'
   struct DW {
     real_T DiscreteTimeIntegrator_DSTATE[6];// '<S1>/Discrete-Time Integrator'
-    real_T Estimateintegrator_DSTATE[6];// '<S1>/Estimate integrator'
-    real_T DiscreteTimeIntegrator1_DSTATE[6];// '<S1>/Discrete-Time Integrator1' 
   };
 
   // Constant parameters (default storage)
@@ -116,6 +114,12 @@ class Estimator final
 
 // Constant parameters (default storage)
 extern const Estimator::ConstP rtConstP1;
+
+//-
+//  These blocks were eliminated from the model due to optimizations:
+//
+//  Block '<S1>/Gain' : Eliminated nontunable gain of 1
+
 
 //-
 //  The generated code includes comments that allow you to trace directly

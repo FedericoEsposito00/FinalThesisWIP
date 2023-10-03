@@ -86,7 +86,7 @@ class HC_NODE {
 
         // ROS topic objects
 		ros::Publisher _motor_speed_pub;
-        ros::Publisher _x_estimate_pub;
+        ros::Publisher _estimate_pub;
         ros::Subscriber _odom_sub;
         ros::Subscriber _imu_sub;
         ros::Subscriber _ref_sub;
@@ -97,7 +97,7 @@ HC_NODE::HC_NODE() {
 
     // ROS topic initialization
     _motor_speed_pub = _nh.advertise< mav_msgs::Actuators > ("/licasa1/command/motor_speed", 1);
-    _x_estimate_pub = _nh.advertise< std_msgs::Float64 > ("/licasa1/x_estimate", 1);
+    _estimate_pub = _nh.advertise< std_msgs::Float64MultiArray > ("/licasa1/estimate", 1);
 
     _odom_sub = _nh.subscribe("/licasa1/ground_truth/odometry", 0, &HC_NODE::odom_callback, this);	
 	_imu_sub = _nh.subscribe("/licasa1/ground_truth/imu", 0, &HC_NODE::imu_callback, this);	
@@ -259,7 +259,7 @@ void HC_NODE::ctrl_loop() {
     // the estimator runs during this phase
     cout<<"OPEN LOOP START\n";
 
-    std_msgs::Float64 x_est;
+    std_msgs::Float64MultiArray est_msg;
 
     // cout<<"Start position: "<<_p_b<<endl<<"Start orientation: "<<_eta_b<<endl;
 
@@ -282,6 +282,8 @@ void HC_NODE::ctrl_loop() {
         est.rtU.p_dot[0] = _p_b_dot(0);
         est.rtU.p_dot[1] = _p_b_dot(1);
         est.rtU.p_dot[2] = _p_b_dot(2);
+
+        est_msg.data.clear();
         
         est.step();
 
@@ -289,12 +291,11 @@ void HC_NODE::ctrl_loop() {
         for (int i = 0; i < 6; i++) {
             estimate[i] = est.rtY.estimate[i];
             cout<<est.rtY.estimate[i]<<endl;
+            est_msg.data.push_back(estimate[i]);
         }
         cout<<endl;
 
-        x_est.data = estimate[0];
-
-        _x_estimate_pub.publish(x_est);
+        _estimate_pub.publish(est_msg);
 
         time = time + 1.0/RATE;
         r.sleep();
@@ -335,6 +336,8 @@ void HC_NODE::ctrl_loop() {
             est.rtU.tau[i] = tau[i];
             est.rtU.p_dot[i] = _p_b_dot(i);
         }
+
+        est_msg.data.clear();
         
         // Estimator step
         est.step();
@@ -342,6 +345,7 @@ void HC_NODE::ctrl_loop() {
         // Estimator ouput
         for (int i = 0; i < 6; i++) {
             estimate[i] = est.rtY.estimate[i];
+            est_msg.data.push_back(estimate[i]);
         }
 
         // Controller input
@@ -425,9 +429,8 @@ void HC_NODE::ctrl_loop() {
         // if (ii < N-1) {
         //     ii++;
         // }
-
-        x_est.data = estimate[0];
-        _x_estimate_pub.publish(x_est);
+        
+        _estimate_pub.publish(est_msg);
 
         time = time + 1.0/RATE;
 		r.sleep();

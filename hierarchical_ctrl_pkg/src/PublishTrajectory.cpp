@@ -8,7 +8,6 @@
 #include <iostream>
 
 #define RATE 100
-#define F_des 0
 #define Kp 1e-2
 #define Ki 1e-2
 
@@ -18,8 +17,8 @@ using namespace std;
 class PUB_TRA {
 	public:
 		PUB_TRA();
-		void cb(std_msgs::Float64::ConstPtr msg);
-		void control_cb(std_msgs::Float64::ConstPtr msg);
+		void cb(std_msgs::Float64MultiArray::ConstPtr msg);
+		void control_cb(std_msgs::Float64MultiArray::ConstPtr msg);
 		void pub_trajectory();
 	private:
 
@@ -38,9 +37,11 @@ class PUB_TRA {
 		double* P_dd_z;
 		double* P_dd_psi;
 
-		double x_est;
+		double est[6];
 
 		bool activate_control;
+		double F_des; // absolute value of the desired force
+		double angle; // angle of the force that the robot feels from the environment
 
 		ros::NodeHandle _nh;
 		ros::Publisher _topic_pub;
@@ -50,7 +51,7 @@ class PUB_TRA {
 };
 
 PUB_TRA::PUB_TRA(): _rate(RATE) {
-	_topic_sub = _nh.subscribe("/licasa1/x_estimate", 1, &PUB_TRA::cb, this);
+	_topic_sub = _nh.subscribe("/licasa1/estimate", 1, &PUB_TRA::cb, this);
 	_topic_pub = _nh.advertise< std_msgs::Float64MultiArray > ("/licasa1/ref_topic", 1);
 	_activate_control_sub = _nh.subscribe("/licasa1/activate_control", 1, &PUB_TRA::control_cb, this);
 
@@ -95,7 +96,12 @@ PUB_TRA::PUB_TRA(): _rate(RATE) {
         ref>>P_dd_psi[i];
 	}
 
-	x_est = 0;
+	for (int i = 0; i < 6; i++) {
+		est[i] = 0;
+	}
+
+	F_des = 0;
+	angle = 0;
 
 	activate_control = false;
 
@@ -105,18 +111,22 @@ PUB_TRA::PUB_TRA(): _rate(RATE) {
 }
 
 //Callback function: the input of the function is the data to read
-void PUB_TRA::cb(std_msgs::Float64::ConstPtr msg) {
-	x_est = msg->data;
+void PUB_TRA::cb(std_msgs::Float64MultiArray::ConstPtr msg) {
+	for (int i = 0; i < 6; i++) {
+		est[i] = msg->data[i];
+	}
 }
 
 //Callback function: the input of the function is the data to read
-void PUB_TRA::control_cb(std_msgs::Float64::ConstPtr msg) {
-	if (msg->data > 0) {
+void PUB_TRA::control_cb(std_msgs::Float64MultiArray::ConstPtr msg) {
+	if (msg->data[0] > 0) {
 		activate_control = true;
 	} else {
 		activate_control = false;
 	}
 
+	F_des = msg->data[1];
+	angle = msg->data[2];
 }
 
 void PUB_TRA::pub_trajectory() {
@@ -124,33 +134,55 @@ void PUB_TRA::pub_trajectory() {
 	int ii = 0;
 	std_msgs::Float64MultiArray ref_msg;
 
-	double err = 0;
-	double err_int = 0;
+	double err_x = 0;
+	double err_x_int = 0;
 	double delta_x = 0;
 	double delta_x_send = 0;
+	double err_y = 0;
+	double err_y_int = 0;
+	double delta_y = 0;
+	double delta_y_send = 0;
 
 	while (ros::ok()) {
 
 		if (activate_control) {
-			err = F_des - x_est;
-			err_int = err_int + err*1/RATE;;
-			delta_x = -Kp*err - Ki*err_int;
-			// delta_d_x = (delta_x - delta_x_old)*RATE;
-			// delta_dd_x = (delta_d_x - delta_d_x_old)*RATE;
+			err_x = F_des*cos(angle) - est[0];
+			err_x_int = err_x_int + err_x*1/RATE;;
+			delta_x = -Kp*err_x - Ki*err_x_int;
 			delta_x_send = 0.9*delta_x_send + 0.1*delta_x;
+			err_y = F_des*sin(angle) - est[1];
+			err_y_int = err_y_int + err_y*1/RATE;;
+			delta_y = -Kp*err_y - Ki*err_y_int;
+			delta_y_send = 0.9*delta_y_send + 0.1*delta_y;
 			cout<<"delta_x: "<<delta_x<<endl;
 			cout<<"delta_x_send: "<<delta_x_send<<endl;
+			cout<<"delta_y: "<<delta_y<<endl;
+			cout<<"delta_y_send: "<<delta_y_send<<endl;
 		} else {
-			err = 0;
-			err_int = 0;
+			err_x = 0;
+			err_x_int = 0;
 			delta_x = 0;
-			delta_x_send = 0.9*delta_x_send;
-			cout<<"delta_x_send: "<<delta_x_send<<endl;
+			if (abs(delta_x_send) < 1e-4) {
+				delta_x_send = 0;
+			} else {
+				delta_x_send = 0.995*delta_x_send;
+			}
+			err_y = 0;
+			err_y_int = 0;
+			delta_y = 0;
+			if (abs(delta_y_send) < 1e-4) {
+				delta_y_send = 0;
+			} else {
+				delta_y_send = 0.995*delta_y_send;
+			}
+			cout<<"delta_y_send: "<<delta_y_send<<endl;
 		}
 
 		ref_msg.data.clear();
-		ref_msg.data.push_back(P_x[ii]+delta_x_send);
-		ref_msg.data.push_back(P_y[ii]);
+		ref_msg.data.push_back(P_x[ii] + delta_x_send*cos(P_psi[ii]) - delta_y_send*sin(P_psi[ii]));
+		//cout<<"x: "<<P_x[ii] + delta_x_send*cos(P_psi[ii]) - delta_y_send*sin(P_psi[ii])<<endl;
+		ref_msg.data.push_back(P_y[ii] + delta_x_send*sin(P_psi[ii]) + delta_y_send*cos(P_psi[ii]));
+		//cout<<"y: "<<P_y[ii] + delta_x_send*sin(P_psi[ii]) + delta_y_send*cos(P_psi[ii])<<endl;
 		ref_msg.data.push_back(P_z[ii]);
 		ref_msg.data.push_back(P_psi[ii]);
 		ref_msg.data.push_back(P_d_x[ii]);
