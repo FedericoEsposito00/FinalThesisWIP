@@ -145,7 +145,7 @@ include_directories(
 ## The recommended prefix ensures that target names across packages don't collide
 add_executable(og_hierarchical_ctrl_node src/og_hierarchical_ctrl_node.cpp src/hc/HierarchicalControl.cpp src/hc/HierarchicalControl_data.cpp)
 add_executable(sensors_hierarchical_ctrl_node src/sensors_hierarchical_ctrl_node.cpp src/hc/HierarchicalControl.cpp src/hc/HierarchicalControl_data.cpp src/est/Estimator.cpp src/est/Estimator_data.cpp)
-add_executable(PublishTrajectory_node src/PublishTrajectory.cpp)
+add_executable(publish_trajectory_node src/publish_trajectory.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -166,7 +166,7 @@ target_link_libraries(sensors_hierarchical_ctrl_node
   ${catkin_LIBRARIES}
 )
 
-target_link_libraries(PublishTrajectory_node
+target_link_libraries(publish_trajectory_node
   ${catkin_LIBRARIES}
 )
 

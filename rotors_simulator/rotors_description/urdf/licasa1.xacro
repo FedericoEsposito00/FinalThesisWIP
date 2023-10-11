@@ -576,6 +576,18 @@
       <mass value="1e-3" />
       <inertia ixx="1e-03" ixy="0.0" ixz="0.0" iyy="1e-03" iyz="0.0" izz="1e-03"/>
     </inertial>
+    <!-- <visual>
+      <origin xyz="0 0 0"/> 
+      <geometry>
+        <sphere radius="0.01"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0"/>
+      <geometry>
+        <sphere radius="0.01"/>
+      </geometry>
+    </collision> -->
   </link>
   
   <joint name="left_eef_joint" type="fixed">
@@ -590,104 +602,18 @@
       <mass value="1e-3" />
       <inertia ixx="1e-03" ixy="0.0" ixz="0.0" iyy="1e-03" iyz="0.0" izz="1e-03"/>
     </inertial>
+    <!-- <visual>
+      <origin xyz="0 0 0"/> 
+      <geometry>
+        <sphere radius="0.01"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0"/>
+      <geometry>
+        <sphere radius="0.01"/>
+      </geometry>
+    </collision> -->
   </link> 
-
-  <!-- Enable the Joint Feedback -->
-    <!-- The ft_sensor plugin -->
-  <!-- <gazebo reference="LiCAS_A1_q1_1">
-    <provideFeedback>true</provideFeedback>
-  </gazebo>
-  <gazebo>
-    <plugin name="LiCAS_A1_q1_1_sensor" filename="libgazebo_ros_ft_sensor.so">
-      <updateRate>100.0</updateRate>
-      <topicName>LiCAS_A1_q1_1_sensor</topicName>
-      <jointName>LiCAS_A1_q1_1</jointName>
-    </plugin>
-  </gazebo> -->
-
-  <!-- <gazebo reference="LiCAS_A1_q1_2">
-    <provideFeedback>true</provideFeedback>
-  </gazebo>
-  <gazebo>
-    <plugin name="LiCAS_A1_q1_2_sensor" filename="libgazebo_ros_ft_sensor.so">
-      <updateRate>100.0</updateRate>
-      <topicName>LiCAS_A1_q1_2_sensor</topicName>
-      <jointName>LiCAS_A1_q1_2</jointName>
-    </plugin>
-  </gazebo> -->
-
-  <!-- <gazebo reference="LiCAS_A1_q1_3">
-    <provideFeedback>true</provideFeedback>
-  </gazebo>
-  <gazebo>
-    <plugin name="LiCAS_A1_q1_3_sensor" filename="libgazebo_ros_ft_sensor.so">
-      <updateRate>100.0</updateRate>
-      <topicName>LiCAS_A1_q1_3_sensor</topicName>
-      <jointName>LiCAS_A1_q1_3</jointName>
-    </plugin>
-  </gazebo> -->
-
-  <!-- <gazebo reference="LiCAS_A1_q1_4">
-    <provideFeedback>true</provideFeedback>
-  </gazebo>
-  <gazebo>
-    <plugin name="LiCAS_A1_q1_4_sensor" filename="libgazebo_ros_ft_sensor.so">
-      <updateRate>100.0</updateRate>
-      <topicName>LiCAS_A1_q1_4_sensor</topicName>
-      <jointName>LiCAS_A1_q1_4</jointName>
-    </plugin>
-  </gazebo> -->
-
-  <!-- <gazebo reference="LiCAS_A1_q2_1">
-    <provideFeedback>true</provideFeedback>
-  </gazebo>
-  <gazebo>
-    <plugin name="LiCAS_A1_q2_1_sensor" filename="libgazebo_ros_ft_sensor.so">
-      <updateRate>100.0</updateRate>
-      <topicName>LiCAS_A1_q2_1_sensor</topicName>
-      <jointName>LiCAS_A1_q2_1</jointName>
-    </plugin>
-  </gazebo> -->
-
-  <!-- <gazebo reference="LiCAS_A1_q2_2">
-    <provideFeedback>true</provideFeedback>
-  </gazebo>
-  <gazebo>
-    <plugin name="LiCAS_A1_q2_2_sensor" filename="libgazebo_ros_ft_sensor.so">
-      <updateRate>100.0</updateRate>
-      <topicName>LiCAS_A1_q2_2_sensor</topicName>
-      <jointName>LiCAS_A1_q2_2</jointName>
-    </plugin>
-  </gazebo> -->
-
-  <!-- <gazebo reference="LiCAS_A1_q2_3">
-    <provideFeedback>true</provideFeedback>
-  </gazebo>
-  <gazebo>
-    <plugin name="LiCAS_A1_q2_3_sensor" filename="libgazebo_ros_ft_sensor.so">
-      <updateRate>100.0</updateRate>
-      <topicName>LiCAS_A1_q2_3_sensor</topicName>
-      <jointName>LiCAS_A1_q2_3</jointName>
-    </plugin>
-  </gazebo> -->
-
-  <!-- <gazebo reference="LiCAS_A1_q2_4">
-    <provideFeedback>true</provideFeedback>
-  </gazebo>
-  <gazebo>
-    <plugin name="LiCAS_A1_q2_4_sensor" filename="libgazebo_ros_ft_sensor.so">
-      <updateRate>100.0</updateRate>
-      <topicName>LiCAS_A1_q2_4_sensor</topicName>
-      <jointName>LiCAS_A1_q2_4</jointName>
-    </plugin>
-  </gazebo> -->
-
-  <!-- <gazebo>
-    <plugin name="f3d_plugin" filename="libgazebo_ros_f3d.so">
-      <robotNamespace>licasa1</robotNamespace>
-      <bodyName>left_eef_link</bodyName>
-      <topicName>left_eef_link/body_wrench</topicName>
-    </plugin>
-  </gazebo>   -->
   
 </robot>

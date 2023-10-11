@@ -20,6 +20,10 @@ class JOY_WRAP {
 		double _x_speed;
 		double _y_speed;
 		double _z_speed;
+		int _state; // 0 = shoulder based, 1 = world based
+		int _old_state;
+		int _button;
+		int _old_button;
 		tf::Transform _ref_trans;
 		tf::TransformBroadcaster _trans_br;
 		ros::NodeHandle _nh;
@@ -32,6 +36,8 @@ JOY_WRAP::JOY_WRAP(): _rate(RATE) {
 	_x_speed = 0;
 	_y_speed = 0;
 	_z_speed = 0;
+	_state = _old_state = 0;
+	_button = _old_button = 0;
 	_topic_sub = _nh.subscribe("/joy", 1, &JOY_WRAP::cb, this);
 	tf::TransformListener listener;
 	tf::StampedTransform left_eef;
@@ -66,6 +72,14 @@ void JOY_WRAP::cb(sensor_msgs::Joy::ConstPtr msg) {
 	_y_speed = msg->axes[0]*_rescaleValue;
 	_z_speed = msg->axes[1]*_rescaleValue;
 	_x_speed = msg->axes[3]*_rescaleValue;
+
+	_button = msg->buttons[2];
+
+	if (_button == 1 && _old_button == 0) {
+		_state = (_state + 1)%2;
+		cout<<"STATE: "<<_state<<endl;
+	}
+	_old_button = _button;
 	//ROS_INFO("I heard: _x_speed = %f, _y_speed = %f, _z_speed = %f\n", _x_speed, _y_speed, _z_speed);
 }
 
@@ -74,24 +88,63 @@ void JOY_WRAP::pub_ref() {
 	double x = _ref_trans.getOrigin().x();
 	double y = _ref_trans.getOrigin().y();
 	double z = _ref_trans.getOrigin().z();
+	double x_world = 0;
+	double y_world = 0;
+	double z_world = 0;
+	tf::TransformListener listener;
+	tf::StampedTransform left_eef;
+	tf::StampedTransform right_eef;
+	tf::Transform _right_ref_trans;
+	tf::Transform _left_ref_trans;
+	tf::Quaternion q;
 	while (ros::ok()) {
-		x = x + _x_speed/RATE;
-		y = y + _y_speed/RATE;
-		z = z + _z_speed/RATE;
-		tf::Transform _right_ref_trans;
-		tf::Transform _left_ref_trans;
-		//cout<<"Current ref position computed\n";
-		_ref_trans.setOrigin(tf::Vector3(x, y, z));
-		_right_ref_trans.setOrigin(tf::Vector3(x, y-L_half, z));
-		_left_ref_trans.setOrigin(tf::Vector3(x, y+L_half, z));
-		tf::Quaternion q;
-		q.setRPY(0, 0, 0);
-		_right_ref_trans.setRotation(q);
-		_left_ref_trans.setRotation(q);
-		_trans_br.sendTransform(tf::StampedTransform(_ref_trans, ros::Time::now(), "shoulder_link_y", "ref_frame"));
-		_trans_br.sendTransform(tf::StampedTransform(_left_ref_trans, ros::Time::now(), "shoulder_link_y", "left_ref_frame"));
-		_trans_br.sendTransform(tf::StampedTransform(_right_ref_trans, ros::Time::now(), "shoulder_link_y", "right_ref_frame"));
-		//cout<<"Transform sent\n";
+		if (_state == 1 && _old_state == 0) {
+			listener.lookupTransform("world","left_eef_link",ros::Time(0), left_eef);
+			listener.lookupTransform("world","right_eef_link",ros::Time(0), right_eef);
+
+			x_world = (left_eef.getOrigin().x()+right_eef.getOrigin().x())/2;
+			y_world = (left_eef.getOrigin().y()+right_eef.getOrigin().y())/2;
+			z_world = (left_eef.getOrigin().z()+right_eef.getOrigin().z())/2;
+		}
+		if (_state == 1) {
+			x_world = x_world + _x_speed/RATE;
+			y_world = y_world + _y_speed/RATE;
+			z_world = z_world + _z_speed/RATE;
+			//cout<<"Current ref position computed\n";
+			_ref_trans.setOrigin(tf::Vector3(x_world, y_world, z_world));
+			_right_ref_trans.setOrigin(tf::Vector3(x_world, y_world-L_half, z_world));
+			_left_ref_trans.setOrigin(tf::Vector3(x_world, y_world+L_half, z_world));
+			q.setRPY(0, 0, 0);
+			_right_ref_trans.setRotation(q);
+			_left_ref_trans.setRotation(q);
+			_trans_br.sendTransform(tf::StampedTransform(_ref_trans, ros::Time::now(), "world", "ref_frame"));
+			_trans_br.sendTransform(tf::StampedTransform(_left_ref_trans, ros::Time::now(), "world", "left_ref_frame"));
+			_trans_br.sendTransform(tf::StampedTransform(_right_ref_trans, ros::Time::now(), "world", "right_ref_frame"));
+		}
+		if (_state == 0 && _old_state == 1) {
+			listener.lookupTransform("shoulder_link_y","left_eef_link",ros::Time(0), left_eef);
+			listener.lookupTransform("shoulder_link_y","right_eef_link",ros::Time(0), right_eef);
+
+			x = (left_eef.getOrigin().x()+right_eef.getOrigin().x())/2;
+			y = (left_eef.getOrigin().y()+right_eef.getOrigin().y())/2;
+			z = (left_eef.getOrigin().z()+right_eef.getOrigin().z())/2;
+		}
+		if (_state == 0) {
+			x = x + _x_speed/RATE;
+			y = y + _y_speed/RATE;
+			z = z + _z_speed/RATE;
+			//cout<<"Current ref position computed\n";
+			_ref_trans.setOrigin(tf::Vector3(x, y, z));
+			_right_ref_trans.setOrigin(tf::Vector3(x, y-L_half, z));
+			_left_ref_trans.setOrigin(tf::Vector3(x, y+L_half, z));
+			q.setRPY(0, 0, 0);
+			_right_ref_trans.setRotation(q);
+			_left_ref_trans.setRotation(q);
+			_trans_br.sendTransform(tf::StampedTransform(_ref_trans, ros::Time::now(), "shoulder_link_y", "ref_frame"));
+			_trans_br.sendTransform(tf::StampedTransform(_left_ref_trans, ros::Time::now(), "shoulder_link_y", "left_ref_frame"));
+			_trans_br.sendTransform(tf::StampedTransform(_right_ref_trans, ros::Time::now(), "shoulder_link_y", "right_ref_frame"));
+		}
+		_old_state = _state;
 		_rate.sleep();
 	}
 }

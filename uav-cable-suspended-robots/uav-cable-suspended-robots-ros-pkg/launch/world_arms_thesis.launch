@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+
+<!-- Convenience launch file to start the whole simulation --> 
+<launch>
+
+	<include file="$(find rotors_gazebo)/launch/licasa1_no_uav_controller.launch">
+	</include>
+
+	<include file="$(find rotors_gazebo)/launch/licasa1_control.launch">
+	</include>  
+
+	<node name="joy_node" pkg="joy" type="joy_node" /> 
+
+	<node name="world_CLIK_node" pkg="world_clik_pkg" type="world_CLIK_node" output="screen"/> 
+
+	<node name="JoyWrap_uav" pkg="uav-cable-suspended-robots-ros-pkg" type="JoyWrap_uav" output="screen"/> 
+
+</launch>

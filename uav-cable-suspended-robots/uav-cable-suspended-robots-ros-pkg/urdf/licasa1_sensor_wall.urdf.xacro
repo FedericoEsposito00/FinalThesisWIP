@@ -6,7 +6,7 @@
   <link name="world" />
 
   <joint name="sensor_wall_base_joint" type="fixed">
-    <origin xyz="2.5 0 0.05" rpy="0 0 0.75"/> 
+    <origin xyz="2.5 0 0.05" rpy="0 0 0"/> 
     <parent link="world"/>
     <child link="sensor_wall_base"/>
   </joint> 
@@ -62,10 +62,10 @@
 
   <gazebo reference="sensor_wall">
     <material>Gazebo/DarkGrey</material>
-    <mu1>0.5</mu1>
-    <mu2>0.5</mu2>
-    <kp value="1e2" />
-    <kd value="1e2" />
+    <mu1>0.1</mu1>
+    <mu2>0.1</mu2>
+    <kp value="1e3" />
+    <kd value="1e3" />
   </gazebo>
 
   <!-- Enable the Joint Feedback -->
