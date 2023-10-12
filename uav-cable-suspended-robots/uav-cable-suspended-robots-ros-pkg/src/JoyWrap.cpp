@@ -4,6 +4,7 @@
 #include "tf/transform_broadcaster.h"
 #include "tf/transform_listener.h"
 #include <tf2/LinearMath/Quaternion.h>
+#include <std_msgs/Float64.h>
 
 #define RATE 100
 #define L_half 0.18
@@ -14,6 +15,7 @@ class JOY_WRAP {
 	public:
 		JOY_WRAP();
 		void cb(sensor_msgs::Joy::ConstPtr msg);
+		void activation_cb(std_msgs::Float64::ConstPtr msg);
 		void pub_ref();
 	private:
 		double _rescaleValue;
@@ -24,10 +26,12 @@ class JOY_WRAP {
 		int _old_state;
 		int _button;
 		int _old_button;
+		bool _active;
 		tf::Transform _ref_trans;
 		tf::TransformBroadcaster _trans_br;
 		ros::NodeHandle _nh;
 		ros::Subscriber _topic_sub;
+		ros::Subscriber _activation_sub;
 		ros::Rate _rate;
 };
 
@@ -38,39 +42,16 @@ JOY_WRAP::JOY_WRAP(): _rate(RATE) {
 	_z_speed = 0;
 	_state = _old_state = 0;
 	_button = _old_button = 0;
+	_active = false;
 	_topic_sub = _nh.subscribe("/joy", 1, &JOY_WRAP::cb, this);
-	tf::TransformListener listener;
-	tf::StampedTransform left_eef;
-	tf::StampedTransform right_eef;
-	
-	cout<<"Waiting until the initial position is reached\n";
-	//ADD ACTUAL WAIT OF CLIK NODE
-	sleep(20);
-	
-	while (!listener.waitForTransform("shoulder_link_y", "left_eef_link", ros::Time(0), ros::Duration(1)) || !listener.waitForTransform("world", "right_eef_link", ros::Time(0), ros::Duration(1))) {
-		sleep(1);
-		ROS_INFO("WAITING FOR TRANSFORM\n");
-	}
-	listener.lookupTransform("shoulder_link_y","left_eef_link",ros::Time(0), left_eef);
-	listener.lookupTransform("shoulder_link_y","right_eef_link",ros::Time(0), right_eef);
-
-	double init_x = (left_eef.getOrigin().x()+right_eef.getOrigin().x())/2;
-	double init_y = (left_eef.getOrigin().y()+right_eef.getOrigin().y())/2;
-	double init_z = (left_eef.getOrigin().z()+right_eef.getOrigin().z())/2;
-
-	_ref_trans.setOrigin(tf::Vector3(init_x, init_y, init_z));
-
-	tf::Quaternion q;
-	q.setRPY(0, 0, 0);
-	_ref_trans.setRotation(q);
-
+	_activation_sub = _nh.subscribe("/licasa1/joywrap_start", 1, &JOY_WRAP::activation_cb, this);
 	boost::thread(&JOY_WRAP::pub_ref, this);
 }
 
 //Callback function: the input of the function is the data to read
 void JOY_WRAP::cb(sensor_msgs::Joy::ConstPtr msg) {
-	_y_speed = msg->axes[0]*_rescaleValue;
-	_z_speed = msg->axes[1]*_rescaleValue;
+	_y_speed = msg->axes[4]*_rescaleValue; //[0]
+	_z_speed = msg->axes[5]*_rescaleValue; //[1]
 	_x_speed = msg->axes[3]*_rescaleValue;
 
 	_button = msg->buttons[2];
@@ -83,20 +64,49 @@ void JOY_WRAP::cb(sensor_msgs::Joy::ConstPtr msg) {
 	//ROS_INFO("I heard: _x_speed = %f, _y_speed = %f, _z_speed = %f\n", _x_speed, _y_speed, _z_speed);
 }
 
+void JOY_WRAP::activation_cb(std_msgs::Float64::ConstPtr f) {
+	if (f->data > 0 && _active == false) {
+		_active = true;
+		cout<<"JOY_WRAP activated!\n";
+	}
+}
+
 void JOY_WRAP::pub_ref() {
-	//ROS_INFO("First time in pub_ref\n");
-	double x = _ref_trans.getOrigin().x();
-	double y = _ref_trans.getOrigin().y();
-	double z = _ref_trans.getOrigin().z();
-	double x_world = 0;
-	double y_world = 0;
-	double z_world = 0;
 	tf::TransformListener listener;
 	tf::StampedTransform left_eef;
 	tf::StampedTransform right_eef;
+
+	// Wait for the message from CLIK_node that signifies that the initial position has been reached
+	cout<<"Waiting until the initial position is reached\n";
+	while (_active == false) {
+		cout<<_active<<endl;
+		sleep(1);
+	}
+	sleep(5);
+	cout<<"JOYWRAP STARTED FROM CLIK\n";
+	
+	while (!listener.waitForTransform("shoulder_link_y", "left_eef_link", ros::Time(0), ros::Duration(1)) || !listener.waitForTransform("world", "right_eef_link", ros::Time(0), ros::Duration(1))) {
+		sleep(1);
+		cout<<"WAITING FOR TRANSFORM\n";
+	}
+	listener.lookupTransform("shoulder_link_y","left_eef_link",ros::Time(0), left_eef);
+	listener.lookupTransform("shoulder_link_y","right_eef_link",ros::Time(0), right_eef);
+
+	double x = (left_eef.getOrigin().x()+right_eef.getOrigin().x())/2;
+	double y = (left_eef.getOrigin().y()+right_eef.getOrigin().y())/2;
+	double z = (left_eef.getOrigin().z()+right_eef.getOrigin().z())/2;
+
+	_ref_trans.setOrigin(tf::Vector3(x, y, z));
+
+	tf::Quaternion q;
+	q.setRPY(0, 0, 0);
+	_ref_trans.setRotation(q);
+	//ROS_INFO("First time in pub_ref\n");
+	double x_world = 0;
+	double y_world = 0;
+	double z_world = 0;
 	tf::Transform _right_ref_trans;
 	tf::Transform _left_ref_trans;
-	tf::Quaternion q;
 	while (ros::ok()) {
 		if (_state == 1 && _old_state == 0) {
 			listener.lookupTransform("world","left_eef_link",ros::Time(0), left_eef);
@@ -145,6 +155,7 @@ void JOY_WRAP::pub_ref() {
 			_trans_br.sendTransform(tf::StampedTransform(_right_ref_trans, ros::Time::now(), "shoulder_link_y", "right_ref_frame"));
 		}
 		_old_state = _state;
+		// cout<<"Active: "<<_active<<endl;
 		_rate.sleep();
 	}
 }

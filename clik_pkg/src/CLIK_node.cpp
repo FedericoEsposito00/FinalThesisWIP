@@ -42,6 +42,7 @@ class CLIK_NODE {
         CLIK_NODE();
 
         void joint_states_cb( sensor_msgs::JointState );
+        void move_arms_cb( std_msgs::Float64 );
         void goto_initial_position( double dp_l[NJ], double dp_r[NJ] );
         void ctrl_loop();
         void run();
@@ -63,12 +64,14 @@ class CLIK_NODE {
         double ql_d[NJ];
         double qr_d[NJ];
 
+        bool _move_arms;
+
         //ROS topic objects
         ros::Subscriber _js_sub;
+        ros::Subscriber _move_arms_sub;
 		ros::Publisher _left_cmd_pub[NJ];
         ros::Publisher _right_cmd_pub[NJ];
-        ros::Publisher _left_cmd_pub_dummy[NJ];
-        ros::Publisher _right_cmd_pub_dummy[NJ];
+        ros::Publisher _activate_joywrap;
 
         //TF objects
         tf::TransformListener _listener;
@@ -80,6 +83,9 @@ class CLIK_NODE {
 
 CLIK_NODE::CLIK_NODE() {
     _js_sub = _nh.subscribe("/licasa1/joint_states", 0, &CLIK_NODE::joint_states_cb, this);
+    _move_arms_sub = _nh.subscribe("/licasa1/move_arms", 0, &CLIK_NODE::move_arms_cb, this);
+
+    _move_arms = true;
 
     _left_cmd_pub[0] = _nh.advertise< std_msgs::Float64 > ("/licasa1/licasa1_leftarm_1_effort_pos_controller/command", 1);
 	_left_cmd_pub[1] = _nh.advertise< std_msgs::Float64 > ("/licasa1/licasa1_leftarm_2_effort_pos_controller/command", 1);
@@ -91,16 +97,7 @@ CLIK_NODE::CLIK_NODE() {
 	_right_cmd_pub[2] = _nh.advertise< std_msgs::Float64 > ("/licasa1/licasa1_rightarm_3_effort_pos_controller/command", 1);
 	_right_cmd_pub[3] = _nh.advertise< std_msgs::Float64 > ("/licasa1/licasa1_rightarm_4_effort_pos_controller/command", 1);
 
-    _left_cmd_pub_dummy[0] = _nh.advertise< std_msgs::Float64 > ("/licasa1/licasa1_leftarm_1_effort_pos_controller/command_dummy", 1);
-	_left_cmd_pub_dummy[1] = _nh.advertise< std_msgs::Float64 > ("/licasa1/licasa1_leftarm_2_effort_pos_controller/command_dummy", 1);
-	_left_cmd_pub_dummy[2] = _nh.advertise< std_msgs::Float64 > ("/licasa1/licasa1_leftarm_3_effort_pos_controller/command_dummy", 1);
-	_left_cmd_pub_dummy[3] = _nh.advertise< std_msgs::Float64 > ("/licasa1/licasa1_leftarm_4_effort_pos_controller/command_dummy", 1);
-
-    _right_cmd_pub_dummy[0] = _nh.advertise< std_msgs::Float64 > ("/licasa1/licasa1_rightarm_1_effort_pos_controller/command_dummy", 1);
-	_right_cmd_pub_dummy[1] = _nh.advertise< std_msgs::Float64 > ("/licasa1/licasa1_rightarm_2_effort_pos_controller/command_dummy", 1);
-	_right_cmd_pub_dummy[2] = _nh.advertise< std_msgs::Float64 > ("/licasa1/licasa1_rightarm_3_effort_pos_controller/command_dummy", 1);
-	_right_cmd_pub_dummy[3] = _nh.advertise< std_msgs::Float64 > ("/licasa1/licasa1_rightarm_4_effort_pos_controller/command_dummy", 1);
-
+    _activate_joywrap = _nh.advertise< std_msgs::Float64 > ("/licasa1/joywrap_start", 1);
 
     ql[0] = def_q1l_n;
     ql[1] = def_q2l_n;
@@ -155,6 +152,14 @@ void CLIK_NODE::joint_states_cb( sensor_msgs::JointState js ) {
 
 }
 
+void CLIK_NODE::move_arms_cb( std_msgs::Float64 f) {
+    if (f.data > 0) {
+        _move_arms = true;
+    } else {
+        _move_arms = false;
+    }
+}
+
 void CLIK_NODE::goto_initial_position( double dp_l[NJ], double dp_r[NJ] ) {
     ros::Rate r(100);
 
@@ -190,6 +195,9 @@ void CLIK_NODE::goto_initial_position( double dp_l[NJ], double dp_r[NJ] ) {
 	}
 
 	sleep(2);
+    
+    cout<<"CLIK STARTED JOYWRAP\n";
+
 }
 
 void CLIK_NODE::ctrl_loop() {
@@ -209,24 +217,25 @@ void CLIK_NODE::ctrl_loop() {
 	right_i_cmd[3] = def_q4r_n;
 
     //Lock the code to start manually the execution of the trajectory
-	// cout << "Press enter to start the trajectory execution" << endl;
-	// string ln;
-	// getline(cin, ln);
-
-    cout << "Waiting 10 seconds, then starting the trajectory execution" << endl;
-    //ADD WAIT FOR THE CONTROLLERS
-    sleep(10);
+	cout << "Press enter to start the trajectory execution" << endl;
+	string ln;
+	getline(cin, ln);
 
     goto_initial_position(left_i_cmd, right_i_cmd);
     cout<<"Initial position reached\n";
 
-    while (!_listener.waitForTransform("shoulder_link_y", "ref_frame", ros::Time(0), ros::Duration(1))){
-		sleep(1);
-        cout<<"Waiting for reference\n";
+    // Activate the JoyWrap
+    std_msgs::Float64 joywrap_msg;
+    joywrap_msg.data = 1;
+
+    while (!_listener.waitForTransform("shoulder_link_y", "ref_frame", ros::Time(0), ros::Duration(0.01))){
+        // cout<<"Waiting for reference\n";
+        _activate_joywrap.publish(joywrap_msg);
+        r.sleep();
 	}
 
     while(ros::ok()) {
-
+        //_activate_joywrap.publish(joywrap_msg);
         _listener.lookupTransform("shoulder_link_y","ref_frame",ros::Time(0), _tf_ref);
 
         xd[0] = _tf_ref.getOrigin().x();
@@ -245,31 +254,34 @@ void CLIK_NODE::ctrl_loop() {
         rtObj.rtU.q2r = qr[1];
         rtObj.rtU.q3r = qr[2];
         rtObj.rtU.q4r = qr[3];
+        
+        // If _move_arms is false CLIK isn't called, so the joints keep on following the previous reference
+        if (_move_arms == true) { 
+            rtObj.step();
 
-        rtObj.step();
+            std_msgs::Float64 left_cmd[NJ];
+            std_msgs::Float64 right_cmd[NJ];
 
-		std_msgs::Float64 left_cmd[NJ];
-        std_msgs::Float64 right_cmd[NJ];
+            left_cmd[0].data = rtObj.rtY.q1l_d;
+            left_cmd[1].data = rtObj.rtY.q2l_d;
+            left_cmd[2].data = rtObj.rtY.q3l_d;
+            left_cmd[3].data = rtObj.rtY.q4l_d;
+            right_cmd[0].data = rtObj.rtY.q1r_d;
+            right_cmd[1].data = rtObj.rtY.q2r_d;
+            right_cmd[2].data = rtObj.rtY.q3r_d;
+            right_cmd[3].data = rtObj.rtY.q4r_d;
 
-		left_cmd[0].data = rtObj.rtY.q1l_d;
-		left_cmd[1].data = rtObj.rtY.q2l_d;
-		left_cmd[2].data = rtObj.rtY.q3l_d;
-		left_cmd[3].data = rtObj.rtY.q4l_d;
-        right_cmd[0].data = rtObj.rtY.q1r_d;
-		right_cmd[1].data = rtObj.rtY.q2r_d;
-		right_cmd[2].data = rtObj.rtY.q3r_d;
-		right_cmd[3].data = rtObj.rtY.q4r_d;
+            //cout<<"LEFT CMD: \n"<<rtObj.rtY.q1l_d<<endl<<rtObj.rtY.q2l_d<<endl<<rtObj.rtY.q3l_d<<endl<<rtObj.rtY.q4l_d<<endl;
+            //cout<<"RIGHT CMD: \n"<<rtObj.rtY.q1r_d<<endl<<rtObj.rtY.q2r_d<<endl<<rtObj.rtY.q3r_d<<endl<<rtObj.rtY.q4r_d<<endl;
 
-        //cout<<"LEFT CMD: \n"<<rtObj.rtY.q1l_d<<endl<<rtObj.rtY.q2l_d<<endl<<rtObj.rtY.q3l_d<<endl<<rtObj.rtY.q4l_d<<endl;
-        //cout<<"RIGHT CMD: \n"<<rtObj.rtY.q1r_d<<endl<<rtObj.rtY.q2r_d<<endl<<rtObj.rtY.q3r_d<<endl<<rtObj.rtY.q4r_d<<endl;
+            // cout<<"Error: "<<rtObj.rtY.err<<endl;
 
-        // cout<<"Error: "<<rtObj.rtY.err<<endl;
-
-		//Publish all the commands in topics
-		for(int i=0; i<NJ; i++) {
-			_left_cmd_pub[i].publish (left_cmd[i]);
-            _right_cmd_pub[i].publish (right_cmd[i]);
-		}
+            //Publish all the commands in topics
+            for(int i=0; i<NJ; i++) {
+                _left_cmd_pub[i].publish (left_cmd[i]);
+                _right_cmd_pub[i].publish (right_cmd[i]);
+            }
+        }
 
         for(int i = 0; i<3; i++) {
             CoM[i] = rtObj.rtY.CoM[i];
