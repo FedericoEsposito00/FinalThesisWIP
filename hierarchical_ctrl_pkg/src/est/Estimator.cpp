@@ -7,9 +7,9 @@
 //
 // Code generated for Simulink model 'Estimator'.
 //
-// Model version                  : 4.38
+// Model version                  : 4.40
 // Simulink Coder version         : 9.8 (R2022b) 13-May-2022
-// C/C++ source code generated on : Tue Oct 10 09:51:14 2023
+// C/C++ source code generated on : Fri Oct 13 11:46:31 2023
 //
 // Target selection: ert.tlc
 // Embedded hardware selection: Intel->x86-64 (Linux 64)
@@ -22,6 +22,9 @@
 #include <cmath>
 #include <emmintrin.h>
 #include "rtwtypes.h"
+
+#define K_est_1 1 //25 //K^2
+#define K_est_2 1.4142 //7.071 //sqrt(2)*K
 
 // Model step function
 void Estimator::step()
@@ -40,7 +43,7 @@ void Estimator::step()
   real_T Q_tmp_0[9];
   real_T Q_tmp_1[9];
   real_T a[9];
-  real_T rtb_Subtract[6];
+  real_T rtb_K_est_1[6];
   real_T tmp_0[6];
   real_T ct[3];
   real_T tmp_1[3];
@@ -108,7 +111,6 @@ void Estimator::step()
 
   for (i_0 = 0; i_0 < 6; i_0++) {
     // Sum: '<S1>/Subtract' incorporates:
-    //   DiscreteIntegrator: '<S1>/Discrete-Time Integrator'
     //   MATLAB Function: '<S1>/MATLAB Function'
 
     ct_0 = 0.0;
@@ -116,9 +118,12 @@ void Estimator::step()
       ct_0 += tmp[6 * i + i_0] * tmp_0[i];
     }
 
-    rtb_Subtract[i_0] = ct_0 - rtDW.DiscreteTimeIntegrator_DSTATE[i_0];
+    // Gain: '<S1>/K_est_1' incorporates:
+    //   DiscreteIntegrator: '<S1>/Discrete-Time Integrator'
+    //   MATLAB Function: '<S1>/MATLAB Function'
+    //   Sum: '<S1>/Subtract'
 
-    // End of Sum: '<S1>/Subtract'
+    rtb_K_est_1[i_0] = (ct_0 - rtDW.DiscreteTimeIntegrator_DSTATE[i_0]) * K_est_1;
 
     // Outport: '<Root>/estimate' incorporates:
     //   DiscreteIntegrator: '<S1>/Discrete-Time Integrator1'
@@ -340,7 +345,7 @@ void Estimator::step()
     // Sum: '<S1>/Subtract1' incorporates:
     //   DiscreteIntegrator: '<S1>/Discrete-Time Integrator'
 
-    tmp_a = _mm_loadu_pd(&rtb_Subtract[i]);
+    tmp_a = _mm_loadu_pd(&rtb_K_est_1[i]);
 
     // DiscreteIntegrator: '<S1>/Discrete-Time Integrator1' incorporates:
     //   DiscreteIntegrator: '<S1>/Discrete-Time Integrator'
@@ -349,10 +354,10 @@ void Estimator::step()
 
     // Update for DiscreteIntegrator: '<S1>/Discrete-Time Integrator1' incorporates:
     //   DiscreteIntegrator: '<S1>/Discrete-Time Integrator'
-    //   Gain: '<S1>/Gain1'
+    //   Gain: '<S1>/K_est_2'
 
     _mm_storeu_pd(&rtDW.DiscreteTimeIntegrator1_DSTATE[i], _mm_add_pd(_mm_mul_pd
-      (_mm_sub_pd(tmp_a, _mm_mul_pd(_mm_set1_pd(1.4142135623730951), tmp_9)),
+      (_mm_sub_pd(tmp_a, _mm_mul_pd(_mm_set1_pd(K_est_2), tmp_9)),
        _mm_set1_pd(0.01)), tmp_2));
 
     // End of Outputs for SubSystem: '<Root>/Estimator'

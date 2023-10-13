@@ -579,13 +579,13 @@
     <!-- <visual>
       <origin xyz="0 0 0"/> 
       <geometry>
-        <sphere radius="0.01"/>
+        <sphere radius="0.02"/>
       </geometry>
     </visual>
     <collision>
       <origin xyz="0 0 0"/>
       <geometry>
-        <sphere radius="0.01"/>
+        <sphere radius="0.02"/>
       </geometry>
     </collision> -->
   </link>
@@ -605,13 +605,13 @@
     <!-- <visual>
       <origin xyz="0 0 0"/> 
       <geometry>
-        <sphere radius="0.01"/>
+        <sphere radius="0.02"/>
       </geometry>
     </visual>
     <collision>
       <origin xyz="0 0 0"/>
       <geometry>
-        <sphere radius="0.01"/>
+        <sphere radius="0.02"/>
       </geometry>
     </collision> -->
   </link> 

@@ -7,9 +7,9 @@
 //
 // Code generated for Simulink model 'Estimator'.
 //
-// Model version                  : 4.38
+// Model version                  : 4.40
 // Simulink Coder version         : 9.8 (R2022b) 13-May-2022
-// C/C++ source code generated on : Tue Oct 10 09:51:14 2023
+// C/C++ source code generated on : Fri Oct 13 11:46:31 2023
 //
 // Target selection: ert.tlc
 // Embedded hardware selection: Intel->x86-64 (Linux 64)
