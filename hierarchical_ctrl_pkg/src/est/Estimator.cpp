@@ -23,8 +23,8 @@
 #include <emmintrin.h>
 #include "rtwtypes.h"
 
-#define K_est_1 1 //25 //K^2
-#define K_est_2 1.4142 //7.071 //sqrt(2)*K
+#define K_est_1 1
+#define K_est_2 1.4142
 
 // Model step function
 void Estimator::step()

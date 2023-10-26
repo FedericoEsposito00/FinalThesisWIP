@@ -7,9 +7,9 @@
 //
 // Code generated for Simulink model 'CLIK'.
 //
-// Model version                  : 3.72
+// Model version                  : 3.74
 // Simulink Coder version         : 9.8 (R2022b) 13-May-2022
-// C/C++ source code generated on : Thu Sep  7 16:30:16 2023
+// C/C++ source code generated on : Sat Oct 14 10:34:16 2023
 //
 // Target selection: ert.tlc
 // Embedded hardware selection: Intel->x86-64 (Linux 64)
@@ -24,7 +24,6 @@
 #include <emmintrin.h>
 #include <cstring>
 #include <stddef.h>
-#include <iostream>
 #define NumBitsPerChar                 8U
 
 extern real_T rt_powd_snf(real_T u0, real_T u1);
@@ -450,6 +449,9 @@ void CLIK::step()
   real_T q_l_dot_opt_tmp_tmp_7;
   real_T q_l_dot_opt_tmp_tmp_tmp;
   real_T q_l_dot_opt_tmp_tmp_tmp_0;
+  real_T rtb_Add_idx_0;
+  real_T rtb_Add_idx_1;
+  real_T rtb_Add_idx_2;
   real_T rtb_AvoidDividebyZero;
   real_T rtb_MinMax;
   real_T rtb_Sum4_tmp;
@@ -457,11 +459,8 @@ void CLIK::step()
   real_T rtb_Sum4_tmp_1;
   real_T rtb_Sum4_tmp_tmp;
   real_T w_l1m;
-  real_T w_l2M;
   real_T w_l2m;
-  real_T w_l3M;
   real_T w_l3m;
-  real_T w_l4M;
   real_T w_l4m;
   int32_T N_a_tmp;
   int32_T N_a_tmp_tmp;
@@ -487,20 +486,25 @@ void CLIK::step()
 
   rtb_MinMax = std::fmax(10.0 * rtDW.Probe[0], 0.1);
 
-  // DiscreteIntegrator: '<S17>/Integrator' incorporates:
-  //   Bias: '<S1>/Add Constant'
+  // Sum: '<S1>/Add' incorporates:
+  //   Inport: '<Root>/L_half'
   //   Inport: '<Root>/xd'
 
+  rtb_Add_idx_0 = 0.0 + rtU.xd[0];
+  rtb_Add_idx_1 = rtU.L_half + rtU.xd[1];
+  rtb_Add_idx_2 = 0.0 + rtU.xd[2];
+
+  // DiscreteIntegrator: '<S17>/Integrator'
   if (rtDW.Integrator_IC_LOADING != 0) {
-    rtDW.Integrator_DSTATE[0] = rtU.xd[0];
-    rtDW.Integrator_DSTATE[1] = rtU.xd[1] + 0.18;
-    rtDW.Integrator_DSTATE[2] = rtU.xd[2];
+    rtDW.Integrator_DSTATE[0] = rtb_Add_idx_0;
+    rtDW.Integrator_DSTATE[1] = rtb_Add_idx_1;
+    rtDW.Integrator_DSTATE[2] = rtb_Add_idx_2;
   }
 
   if (rtDW.Integrator_PrevResetState != 0) {
-    rtDW.Integrator_DSTATE[0] = rtU.xd[0];
-    rtDW.Integrator_DSTATE[1] = rtU.xd[1] + 0.18;
-    rtDW.Integrator_DSTATE[2] = rtU.xd[2];
+    rtDW.Integrator_DSTATE[0] = rtb_Add_idx_0;
+    rtDW.Integrator_DSTATE[1] = rtb_Add_idx_1;
+    rtDW.Integrator_DSTATE[2] = rtb_Add_idx_2;
   }
 
   // MATLAB Function: '<S1>/dirkin_l' incorporates:
@@ -520,57 +524,47 @@ void CLIK::step()
   rtb_Sum4_tmp_1 = std::cos(rtU.q1l);
 
   // Product: '<S3>/1//T' incorporates:
-  //   Bias: '<S1>/Add Constant'
   //   DiscreteIntegrator: '<S17>/Integrator'
   //   Fcn: '<S13>/Avoid Divide by Zero'
-  //   Inport: '<Root>/xd'
   //   Sum: '<S3>/Sum1'
 
-  rtb_uT[0] = 1.0 / rtb_MinMax * (rtU.xd[0] - rtDW.Integrator_DSTATE[0]);
+  rtb_uT[0] = 1.0 / rtb_MinMax * (rtb_Add_idx_0 - rtDW.Integrator_DSTATE[0]);
 
   // Sum: '<S1>/Sum3' incorporates:
-  //   Bias: '<S1>/Add Constant'
-  //   Inport: '<Root>/xd'
   //   MATLAB Function: '<S1>/dirkin_l'
+  //   Sum: '<S3>/Sum1'
 
-  w_l2M = rtU.xd[0] - ((-(11.0 * j * i) / 40.0 - (i * k * rtb_Sum4_tmp +
-    rtb_Sum4_tmp_1 * rtb_Sum4_tmp_0) * rtb_Sum4_tmp_tmp / 4.0) - j * l * i / 4.0);
+  rtb_Add_idx_0 -= (-(11.0 * j * i) / 40.0 - (i * k * rtb_Sum4_tmp +
+    rtb_Sum4_tmp_1 * rtb_Sum4_tmp_0) * rtb_Sum4_tmp_tmp / 4.0) - j * l * i / 4.0;
 
   // Product: '<S3>/1//T' incorporates:
-  //   Bias: '<S1>/Add Constant'
   //   DiscreteIntegrator: '<S17>/Integrator'
   //   Fcn: '<S13>/Avoid Divide by Zero'
-  //   Inport: '<Root>/xd'
   //   Sum: '<S3>/Sum1'
 
-  rtb_uT[1] = ((rtU.xd[1] + 0.18) - rtDW.Integrator_DSTATE[1]) * (1.0 /
-    rtb_MinMax);
+  rtb_uT[1] = 1.0 / rtb_MinMax * (rtb_Add_idx_1 - rtDW.Integrator_DSTATE[1]);
 
   // Sum: '<S1>/Sum3' incorporates:
-  //   Bias: '<S1>/Add Constant'
-  //   Inport: '<Root>/xd'
   //   MATLAB Function: '<S1>/dirkin_l'
+  //   Sum: '<S3>/Sum1'
 
-  w_l3M = (rtU.xd[1] + 0.18) - (((11.0 * k / 40.0 + l * k / 4.0) - j *
-    rtb_Sum4_tmp * rtb_Sum4_tmp_tmp / 4.0) + 0.18);
+  rtb_Add_idx_1 -= ((11.0 * k / 40.0 + l * k / 4.0) - j * rtb_Sum4_tmp *
+                    rtb_Sum4_tmp_tmp / 4.0) + 0.18;
 
   // Product: '<S3>/1//T' incorporates:
-  //   Bias: '<S1>/Add Constant'
   //   DiscreteIntegrator: '<S17>/Integrator'
   //   Fcn: '<S13>/Avoid Divide by Zero'
-  //   Inport: '<Root>/xd'
   //   Sum: '<S3>/Sum1'
 
-  rtb_uT[2] = 1.0 / rtb_MinMax * (rtU.xd[2] - rtDW.Integrator_DSTATE[2]);
+  rtb_uT[2] = 1.0 / rtb_MinMax * (rtb_Add_idx_2 - rtDW.Integrator_DSTATE[2]);
 
   // Sum: '<S1>/Sum3' incorporates:
-  //   Bias: '<S1>/Add Constant'
-  //   Inport: '<Root>/xd'
   //   MATLAB Function: '<S1>/dirkin_l'
+  //   Sum: '<S3>/Sum1'
 
-  rtb_MinMax = rtU.xd[2] - (((rtb_Sum4_tmp_0 * i - rtb_Sum4_tmp_1 * k *
-    rtb_Sum4_tmp) * rtb_Sum4_tmp_tmp / 4.0 - 11.0 * rtb_Sum4_tmp_1 * j / 40.0) -
-    rtb_Sum4_tmp_1 * j * l / 4.0);
+  rtb_Add_idx_2 -= ((rtb_Sum4_tmp_0 * i - rtb_Sum4_tmp_1 * k * rtb_Sum4_tmp) *
+                    rtb_Sum4_tmp_tmp / 4.0 - 11.0 * rtb_Sum4_tmp_1 * j / 40.0) -
+    rtb_Sum4_tmp_1 * j * l / 4.0;
 
   // End of Outputs for SubSystem: '<Root>/CLIK'
   for (i_0 = 0; i_0 <= 0; i_0 += 2) {
@@ -580,10 +574,10 @@ void CLIK::step()
 
     tmp_2 = _mm_loadu_pd(&rtb_uT[i_0]);
     _mm_storeu_pd(&rtb_Sum4[i_0], _mm_add_pd(_mm_add_pd(_mm_add_pd(_mm_mul_pd
-      (_mm_loadu_pd(&rtConstP.pooled6[i_0 + 3]), _mm_set1_pd(w_l3M)), _mm_mul_pd
-      (_mm_loadu_pd(&rtConstP.pooled6[i_0]), _mm_set1_pd(w_l2M))), _mm_mul_pd
-      (_mm_loadu_pd(&rtConstP.pooled6[i_0 + 6]), _mm_set1_pd(rtb_MinMax))),
-      tmp_2));
+      (_mm_loadu_pd(&rtConstP.pooled6[i_0 + 3]), _mm_set1_pd(rtb_Add_idx_1)),
+      _mm_mul_pd(_mm_loadu_pd(&rtConstP.pooled6[i_0]), _mm_set1_pd(rtb_Add_idx_0))),
+      _mm_mul_pd(_mm_loadu_pd(&rtConstP.pooled6[i_0 + 6]), _mm_set1_pd
+                 (rtb_Add_idx_2))), tmp_2));
 
     // End of Outputs for SubSystem: '<Root>/CLIK'
   }
@@ -593,9 +587,9 @@ void CLIK::step()
   //   Gain: '<S1>/Gain1'
 
   for (i_0 = 2; i_0 < 3; i_0++) {
-    rtb_Sum4[i_0] = ((rtConstP.pooled6[i_0 + 3] * w_l3M + rtConstP.pooled6[i_0] *
-                      w_l2M) + rtConstP.pooled6[i_0 + 6] * rtb_MinMax) +
-      rtb_uT[i_0];
+    rtb_Sum4[i_0] = ((rtConstP.pooled6[i_0 + 3] * rtb_Add_idx_1 +
+                      rtConstP.pooled6[i_0] * rtb_Add_idx_0) +
+                     rtConstP.pooled6[i_0 + 6] * rtb_Add_idx_2) + rtb_uT[i_0];
   }
 
   // MATLAB Function: '<S1>/q_l_dot' incorporates:
@@ -622,12 +616,12 @@ void CLIK::step()
 
   rtb_MinMax = (rtU.q1l - 1.5207963267948965) / 3.1415926535897931;
   rtb_MinMax = rtb_MinMax * rtb_MinMax * 0.5;
-  w_l2M = (rtU.q2l - 1.5207963267948965) / 1.9198621771937625;
-  w_l2M = w_l2M * w_l2M * 0.5;
-  w_l3M = (rtU.q3l - 1.5207963267948965) / 3.1415926535897931;
-  w_l3M = w_l3M * w_l3M * 0.5;
-  w_l4M = (rtU.q4l - 2.5679938779914946) / 5.2359877559829888;
-  w_l4M = w_l4M * w_l4M * 0.5;
+  rtb_Add_idx_0 = (rtU.q2l - 1.5207963267948965) / 1.9198621771937625;
+  rtb_Add_idx_0 = rtb_Add_idx_0 * rtb_Add_idx_0 * 0.5;
+  rtb_Add_idx_1 = (rtU.q3l - 1.5207963267948965) / 3.1415926535897931;
+  rtb_Add_idx_1 = rtb_Add_idx_1 * rtb_Add_idx_1 * 0.5;
+  rtb_Add_idx_2 = (rtU.q4l - 2.5679938779914946) / 5.2359877559829888;
+  rtb_Add_idx_2 = rtb_Add_idx_2 * rtb_Add_idx_2 * 0.5;
   w_l1m = (rtU.q1l - -1.5207963267948965) / 3.1415926535897931;
   w_l1m = w_l1m * w_l1m * 0.5;
   w_l2m = (rtU.q2l - -0.29906585039886591) / 1.9198621771937625;
@@ -1819,7 +1813,7 @@ void CLIK::step()
 
     if (temp_act[static_cast<int32_T>(i) + 31] == 1) {
       l = rtU.K_l2M;
-      rtb_Sum4_tmp = -w_l2M;
+      rtb_Sum4_tmp = -rtb_Add_idx_0;
       J_b[0] = 0.0;
       J_b[1] = J_l2M[1];
       rtb_Sum4_tmp_tmp = J_l2M[1] * J_l2M[1];
@@ -1870,7 +1864,7 @@ void CLIK::step()
 
     if (temp_act[static_cast<int32_T>(i) + 63] == 1) {
       rtb_Sum4_tmp_tmp = rtU.K_l3M;
-      rtb_Sum4_tmp_0 = -w_l3M;
+      rtb_Sum4_tmp_0 = -rtb_Add_idx_1;
       J_c[0] = 0.0;
       J_c[1] = 0.0;
       J_c[2] = J_l3M[2];
@@ -1917,7 +1911,7 @@ void CLIK::step()
 
     if (temp_act[static_cast<int32_T>(i) + 95] == 1) {
       rtb_Sum4_tmp_1 = rtU.K_l4M;
-      Je_tmp_1 = -w_l4M;
+      Je_tmp_1 = -rtb_Add_idx_2;
       J_d[0] = 0.0;
       J_d[1] = 0.0;
       J_d[2] = 0.0;
@@ -2224,29 +2218,32 @@ void CLIK::step()
 
   rtb_MinMax = std::fmax(10.0 * rtDW.Probe_n[0], 0.1);
 
-  // DiscreteIntegrator: '<S12>/Integrator' incorporates:
-  //   Bias: '<S1>/Add Constant1'
+  // Sum: '<S1>/Add1' incorporates:
+  //   Inport: '<Root>/L_half'
   //   Inport: '<Root>/xd'
 
+  rtb_Add_idx_0 = rtU.xd[0] - 0.0;
+  rtb_Add_idx_1 = rtU.xd[1] - rtU.L_half;
+  rtb_Add_idx_2 = rtU.xd[2] - 0.0;
+
+  // DiscreteIntegrator: '<S12>/Integrator'
   if (rtDW.Integrator_IC_LOADING_d != 0) {
-    rtDW.Integrator_DSTATE_a[0] = rtU.xd[0];
-    rtDW.Integrator_DSTATE_a[1] = rtU.xd[1] - 0.18;
-    rtDW.Integrator_DSTATE_a[2] = rtU.xd[2];
+    rtDW.Integrator_DSTATE_a[0] = rtb_Add_idx_0;
+    rtDW.Integrator_DSTATE_a[1] = rtb_Add_idx_1;
+    rtDW.Integrator_DSTATE_a[2] = rtb_Add_idx_2;
   }
 
   if (rtDW.Integrator_PrevResetState_f != 0) {
-    rtDW.Integrator_DSTATE_a[0] = rtU.xd[0];
-    rtDW.Integrator_DSTATE_a[1] = rtU.xd[1] - 0.18;
-    rtDW.Integrator_DSTATE_a[2] = rtU.xd[2];
+    rtDW.Integrator_DSTATE_a[0] = rtb_Add_idx_0;
+    rtDW.Integrator_DSTATE_a[1] = rtb_Add_idx_1;
+    rtDW.Integrator_DSTATE_a[2] = rtb_Add_idx_2;
   }
 
   // Product: '<S2>/1//T' incorporates:
-  //   Bias: '<S1>/Add Constant1'
   //   DiscreteIntegrator: '<S12>/Integrator'
-  //   Inport: '<Root>/xd'
   //   Sum: '<S2>/Sum1'
 
-  rtb_Sum4[0] = 1.0 / rtb_MinMax * (rtU.xd[0] - rtDW.Integrator_DSTATE_a[0]);
+  rtb_Sum4[0] = 1.0 / rtb_MinMax * (rtb_Add_idx_0 - rtDW.Integrator_DSTATE_a[0]);
 
   // MATLAB Function: '<S1>/dirkin_r' incorporates:
   //   Inport: '<Root>/q1r'
@@ -2261,40 +2258,33 @@ void CLIK::step()
   k = std::cos(rtU.q2r) * std::cos(rtU.q4r) * std::sin(rtU.q1r) / 4.0;
 
   // Sum: '<S1>/Sum1' incorporates:
-  //   Bias: '<S1>/Add Constant1'
-  //   Inport: '<Root>/xd'
   //   MATLAB Function: '<S1>/dirkin_r'
-
-  w_l2M = rtU.xd[0] - ((-i / 40.0 - j) - k);
-
-  // Product: '<S2>/1//T' incorporates:
-  //   Bias: '<S1>/Add Constant1'
-  //   DiscreteIntegrator: '<S12>/Integrator'
-  //   Inport: '<Root>/xd'
   //   Sum: '<S2>/Sum1'
 
-  rtb_Sum4[1] = ((rtU.xd[1] - 0.18) - rtDW.Integrator_DSTATE_a[1]) * (1.0 /
-    rtb_MinMax);
+  rtb_Add_idx_0 -= (-i / 40.0 - j) - k;
+
+  // Product: '<S2>/1//T' incorporates:
+  //   DiscreteIntegrator: '<S12>/Integrator'
+  //   Sum: '<S2>/Sum1'
+
+  rtb_Sum4[1] = 1.0 / rtb_MinMax * (rtb_Add_idx_1 - rtDW.Integrator_DSTATE_a[1]);
 
   // Sum: '<S1>/Sum1' incorporates:
-  //   Bias: '<S1>/Add Constant1'
   //   Inport: '<Root>/q2r'
   //   Inport: '<Root>/q3r'
   //   Inport: '<Root>/q4r'
-  //   Inport: '<Root>/xd'
   //   MATLAB Function: '<S1>/dirkin_r'
-
-  w_l3M = (rtU.xd[1] - 0.18) - (((11.0 * std::sin(rtU.q2r) / 40.0 + std::cos
-    (rtU.q4r) * std::sin(rtU.q2r) / 4.0) - std::cos(rtU.q2r) * std::sin(rtU.q3r)
-    * std::sin(rtU.q4r) / 4.0) - 0.18);
-
-  // Product: '<S2>/1//T' incorporates:
-  //   Bias: '<S1>/Add Constant1'
-  //   DiscreteIntegrator: '<S12>/Integrator'
-  //   Inport: '<Root>/xd'
   //   Sum: '<S2>/Sum1'
 
-  rtb_Sum4[2] = 1.0 / rtb_MinMax * (rtU.xd[2] - rtDW.Integrator_DSTATE_a[2]);
+  rtb_Add_idx_1 -= ((11.0 * std::sin(rtU.q2r) / 40.0 + std::cos(rtU.q4r) * std::
+                     sin(rtU.q2r) / 4.0) - std::cos(rtU.q2r) * std::sin(rtU.q3r)
+                    * std::sin(rtU.q4r) / 4.0) - 0.18;
+
+  // Product: '<S2>/1//T' incorporates:
+  //   DiscreteIntegrator: '<S12>/Integrator'
+  //   Sum: '<S2>/Sum1'
+
+  rtb_Sum4[2] = 1.0 / rtb_MinMax * (rtb_Add_idx_2 - rtDW.Integrator_DSTATE_a[2]);
 
   // MATLAB Function: '<S1>/dirkin_r' incorporates:
   //   Inport: '<Root>/q1r'
@@ -2309,11 +2299,10 @@ void CLIK::step()
     (rtU.q2r) * std::cos(rtU.q4r) / 4.0;
 
   // Sum: '<S1>/Sum1' incorporates:
-  //   Bias: '<S1>/Add Constant1'
-  //   Inport: '<Root>/xd'
   //   MATLAB Function: '<S1>/dirkin_r'
+  //   Sum: '<S2>/Sum1'
 
-  rtb_MinMax = rtU.xd[2] - l;
+  rtb_Add_idx_2 -= l;
 
   // End of Outputs for SubSystem: '<Root>/CLIK'
   for (i_0 = 0; i_0 <= 0; i_0 += 2) {
@@ -2323,10 +2312,10 @@ void CLIK::step()
 
     tmp_2 = _mm_loadu_pd(&rtb_Sum4[i_0]);
     _mm_storeu_pd(&rtb_Sum2[i_0], _mm_add_pd(_mm_add_pd(_mm_add_pd(_mm_mul_pd
-      (_mm_loadu_pd(&rtConstP.pooled6[i_0 + 3]), _mm_set1_pd(w_l3M)), _mm_mul_pd
-      (_mm_loadu_pd(&rtConstP.pooled6[i_0]), _mm_set1_pd(w_l2M))), _mm_mul_pd
-      (_mm_loadu_pd(&rtConstP.pooled6[i_0 + 6]), _mm_set1_pd(rtb_MinMax))),
-      tmp_2));
+      (_mm_loadu_pd(&rtConstP.pooled6[i_0 + 3]), _mm_set1_pd(rtb_Add_idx_1)),
+      _mm_mul_pd(_mm_loadu_pd(&rtConstP.pooled6[i_0]), _mm_set1_pd(rtb_Add_idx_0))),
+      _mm_mul_pd(_mm_loadu_pd(&rtConstP.pooled6[i_0 + 6]), _mm_set1_pd
+                 (rtb_Add_idx_2))), tmp_2));
 
     // End of Outputs for SubSystem: '<Root>/CLIK'
   }
@@ -2336,9 +2325,9 @@ void CLIK::step()
   //   Gain: '<S1>/Gain2'
 
   for (i_0 = 2; i_0 < 3; i_0++) {
-    rtb_Sum2[i_0] = ((rtConstP.pooled6[i_0 + 3] * w_l3M + rtConstP.pooled6[i_0] *
-                      w_l2M) + rtConstP.pooled6[i_0 + 6] * rtb_MinMax) +
-      rtb_Sum4[i_0];
+    rtb_Sum2[i_0] = ((rtConstP.pooled6[i_0 + 3] * rtb_Add_idx_1 +
+                      rtConstP.pooled6[i_0] * rtb_Add_idx_0) +
+                     rtConstP.pooled6[i_0 + 6] * rtb_Add_idx_2) + rtb_Sum4[i_0];
   }
 
   // MATLAB Function: '<S1>/q_r_dot' incorporates:
@@ -2360,12 +2349,12 @@ void CLIK::step()
 
   rtb_MinMax = (rtU.q1r - 1.5207963267948965) / 3.1415926535897931;
   rtb_MinMax = rtb_MinMax * rtb_MinMax * 0.5;
-  w_l2M = (rtU.q2r - 0.29906585039886591) / 1.9198621771937625;
-  w_l2M = w_l2M * w_l2M * 0.5;
-  w_l3M = (rtU.q3r - 1.5207963267948965) / 3.1415926535897931;
-  w_l3M = w_l3M * w_l3M * 0.5;
-  w_l4M = (rtU.q4r - 2.5679938779914946) / 5.2359877559829888;
-  w_l4M = w_l4M * w_l4M * 0.5;
+  rtb_Add_idx_0 = (rtU.q2r - 0.29906585039886591) / 1.9198621771937625;
+  rtb_Add_idx_0 = rtb_Add_idx_0 * rtb_Add_idx_0 * 0.5;
+  rtb_Add_idx_1 = (rtU.q3r - 1.5207963267948965) / 3.1415926535897931;
+  rtb_Add_idx_1 = rtb_Add_idx_1 * rtb_Add_idx_1 * 0.5;
+  rtb_Add_idx_2 = (rtU.q4r - 2.5679938779914946) / 5.2359877559829888;
+  rtb_Add_idx_2 = rtb_Add_idx_2 * rtb_Add_idx_2 * 0.5;
   w_l1m = (rtU.q1r - -1.5207963267948965) / 3.1415926535897931;
   w_l1m = w_l1m * w_l1m * 0.5;
   w_l2m = (rtU.q2r - -1.5207963267948965) / 1.9198621771937625;
@@ -3436,7 +3425,7 @@ void CLIK::step()
 
     if (temp_act[static_cast<int32_T>(i) + 31] == 1) {
       l = rtU.K_l2M;
-      rtb_Sum4_tmp = -w_l2M;
+      rtb_Sum4_tmp = -rtb_Add_idx_0;
       J_b[0] = 0.0;
       J_b[1] = J_l2M[1];
       rtb_Sum4_tmp_tmp = J_l2M[1] * J_l2M[1];
@@ -3487,7 +3476,7 @@ void CLIK::step()
 
     if (temp_act[static_cast<int32_T>(i) + 63] == 1) {
       rtb_Sum4_tmp_tmp = rtU.K_l3M;
-      rtb_Sum4_tmp_0 = -w_l3M;
+      rtb_Sum4_tmp_0 = -rtb_Add_idx_1;
       J_c[0] = 0.0;
       J_c[1] = 0.0;
       J_c[2] = J_l3M[2];
@@ -3534,7 +3523,7 @@ void CLIK::step()
 
     if (temp_act[static_cast<int32_T>(i) + 95] == 1) {
       rtb_Sum4_tmp_1 = rtU.K_l4M;
-      Je_tmp_1 = -w_l4M;
+      Je_tmp_1 = -rtb_Add_idx_2;
       J_d[0] = 0.0;
       J_d[1] = 0.0;
       J_d[2] = 0.0;
@@ -3839,49 +3828,41 @@ void CLIK::step()
   //   DiscreteIntegrator: '<S1>/Discrete-Time Integrator1'
 
   rtY.q1r_d = rtDW.DiscreteTimeIntegrator1_DSTATE;
-  //std::cout<<"q1r_d = "<<rtY.q1r_d<<std::endl;
 
   // Outport: '<Root>/q3r_d' incorporates:
   //   DiscreteIntegrator: '<S1>/Discrete-Time Integrator2'
 
   rtY.q3r_d = rtDW.DiscreteTimeIntegrator2_DSTATE;
-  //std::cout<<"q3r_d = "<<rtY.q3r_d<<std::endl;
 
   // Outport: '<Root>/q2r_d' incorporates:
   //   DiscreteIntegrator: '<S1>/Discrete-Time Integrator3'
 
   rtY.q2r_d = rtDW.DiscreteTimeIntegrator3_DSTATE;
-  //std::cout<<"q2r_d = "<<rtY.q2r_d<<std::endl;
 
   // Outport: '<Root>/q1l_d' incorporates:
   //   DiscreteIntegrator: '<S1>/Discrete-Time Integrator4'
 
   rtY.q1l_d = rtDW.DiscreteTimeIntegrator4_DSTATE;
-  //std::cout<<"q1l_d = "<<rtY.q1l_d<<std::endl;
 
   // Outport: '<Root>/q3l_d' incorporates:
   //   DiscreteIntegrator: '<S1>/Discrete-Time Integrator5'
 
   rtY.q3l_d = rtDW.DiscreteTimeIntegrator5_DSTATE;
-  //std::cout<<"q3l_d = "<<rtY.q3l_d<<std::endl;
 
   // Outport: '<Root>/q2l_d' incorporates:
   //   DiscreteIntegrator: '<S1>/Discrete-Time Integrator6'
 
   rtY.q2l_d = rtDW.DiscreteTimeIntegrator6_DSTATE;
-  //std::cout<<"q2l_d = "<<rtY.q2l_d<<std::endl;
 
   // Outport: '<Root>/q4l_d' incorporates:
   //   DiscreteIntegrator: '<S1>/Discrete-Time Integrator7'
 
   rtY.q4l_d = rtDW.DiscreteTimeIntegrator7_DSTATE;
-  //std::cout<<"q4l_d = "<<rtY.q4l_d<<std::endl;
 
   // Outport: '<Root>/q4r_d' incorporates:
   //   DiscreteIntegrator: '<S1>/Discrete-Time Integrator8'
 
   rtY.q4r_d = rtDW.DiscreteTimeIntegrator8_DSTATE;
-  //std::cout<<"q4r_d = "<<rtY.q1l_d<<std::endl;
 
   // Update for DiscreteIntegrator: '<S17>/Integrator'
   rtDW.Integrator_IC_LOADING = 0U;
@@ -3952,9 +3933,9 @@ void CLIK::step()
   q_l_dot_opt_tmp_6 = std::sin(rtU.q4l_n);
   q_l_dot_opt_tmp_3 = std::sin(rtU.q4r_n);
   rtb_MinMax = std::cos(rtU.q4l_n);
-  w_l2M = std::cos(rtU.q4r_n);
-  w_l3M = std::sin(rtU.q2l_n);
-  w_l4M = std::sin(rtU.q2r_n);
+  rtb_Add_idx_0 = std::cos(rtU.q4r_n);
+  rtb_Add_idx_1 = std::sin(rtU.q2l_n);
+  rtb_Add_idx_2 = std::sin(rtU.q2r_n);
   w_l1m = std::sin(rtU.q3l_n);
   w_l2m = std::sin(rtU.q3r_n);
   w_l3m = std::cos(rtU.q3l_n);
@@ -3972,45 +3953,47 @@ void CLIK::step()
   //   Inport: '<Root>/q4r_n'
   //   MATLAB Function: '<S1>/q_l_dot'
 
-  rtY.CoM_bar[0] = -((((((((((rtb_AvoidDividebyZero * w_l3M * w_l1m +
+  rtY.CoM_bar[0] = -((((((((((rtb_AvoidDividebyZero * rtb_Add_idx_1 * w_l1m +
     q_l_dot_opt_tmp_0 * w_l3m) * q_l_dot_opt_tmp_6 / 8.0 + (11.0 *
     q_l_dot_opt_tmp_5 * rtb_AvoidDividebyZero / 80.0 + 11.0 * q_l_dot_opt_tmp_1 *
-    q_l_dot_opt_tmp / 80.0)) + (q_l_dot_opt_tmp * w_l4M * w_l2m +
+    q_l_dot_opt_tmp / 80.0)) + (q_l_dot_opt_tmp * rtb_Add_idx_2 * w_l2m +
     q_l_dot_opt_tmp_2 * w_l4m) * q_l_dot_opt_tmp_3 / 8.0) + q_l_dot_opt_tmp_5 *
-    rtb_MinMax * rtb_AvoidDividebyZero / 8.0) + q_l_dot_opt_tmp_1 * w_l2M *
-    q_l_dot_opt_tmp / 8.0) * rtU.load + (((((3.0 * q_l_dot_opt_tmp_0 / 800.0 +
-    3.0 * q_l_dot_opt_tmp_2 / 800.0) + 10879.0 * rtb_AvoidDividebyZero / 5.0E+6)
-    + 10879.0 * q_l_dot_opt_tmp / 5.0E+6) + 10481.0 * q_l_dot_opt_tmp_5 *
-    rtb_AvoidDividebyZero / 100000.0) + 10481.0 * q_l_dot_opt_tmp_1 *
-    q_l_dot_opt_tmp / 100000.0)) + (std::sin(rtU.q1l_n) * std::sin(rtU.q2l_n) *
-    std::sin(rtU.q3l_n) + std::cos(rtU.q1l_n) * std::cos(rtU.q3l_n)) *
-                        (7.409300489671729E+15 * q_l_dot_opt_tmp_6) /
+    rtb_MinMax * rtb_AvoidDividebyZero / 8.0) + q_l_dot_opt_tmp_1 *
+    rtb_Add_idx_0 * q_l_dot_opt_tmp / 8.0) * rtU.load + (((((3.0 *
+    q_l_dot_opt_tmp_0 / 800.0 + 3.0 * q_l_dot_opt_tmp_2 / 800.0) + 10879.0 *
+    rtb_AvoidDividebyZero / 5.0E+6) + 10879.0 * q_l_dot_opt_tmp / 5.0E+6) +
+    10481.0 * q_l_dot_opt_tmp_5 * rtb_AvoidDividebyZero / 100000.0) + 10481.0 *
+    q_l_dot_opt_tmp_1 * q_l_dot_opt_tmp / 100000.0)) + (std::sin(rtU.q1l_n) *
+    std::sin(rtU.q2l_n) * std::sin(rtU.q3l_n) + std::cos(rtU.q1l_n) * std::cos
+    (rtU.q3l_n)) * (7.409300489671729E+15 * q_l_dot_opt_tmp_6) /
                         7.2057594037927936E+17) + (std::sin(rtU.q1r_n) * std::
     sin(rtU.q2r_n) * std::sin(rtU.q3r_n) + std::cos(rtU.q1r_n) * std::cos
     (rtU.q3r_n)) * (7.409300489671729E+15 * q_l_dot_opt_tmp_3) /
                        7.2057594037927936E+17) + 7.409300489671729E+15 *
                       q_l_dot_opt_tmp_5 * rtb_MinMax * rtb_AvoidDividebyZero /
                       7.2057594037927936E+17) + 7.409300489671729E+15 *
-                     q_l_dot_opt_tmp_1 * w_l2M * q_l_dot_opt_tmp /
+                     q_l_dot_opt_tmp_1 * rtb_Add_idx_0 * q_l_dot_opt_tmp /
                      7.2057594037927936E+17) / (rtU.load + 1.6);
-  rtY.CoM_bar[1] = ((((((((11.0 * w_l3M / 80.0 + 11.0 * w_l4M / 80.0) +
-    rtb_MinMax * w_l3M / 8.0) + w_l2M * w_l4M / 8.0) - q_l_dot_opt_tmp_5 * w_l1m
-                        * q_l_dot_opt_tmp_6 / 8.0) - q_l_dot_opt_tmp_1 * w_l2m *
-                       q_l_dot_opt_tmp_3 / 8.0) * rtU.load + (((10481.0 * w_l3M /
-    100000.0 + 10481.0 * w_l4M / 100000.0) + 7.409300489671729E+15 * rtb_MinMax *
-    w_l3M / 7.2057594037927936E+17) + 7.409300489671729E+15 * w_l2M * w_l4M /
-    7.2057594037927936E+17)) - 7.409300489671729E+15 * std::cos(rtU.q2l_n) *
-                     w_l1m * q_l_dot_opt_tmp_6 / 7.2057594037927936E+17) -
+  rtY.CoM_bar[1] = ((((((((11.0 * rtb_Add_idx_1 / 80.0 + 11.0 * rtb_Add_idx_2 /
+    80.0) + rtb_MinMax * rtb_Add_idx_1 / 8.0) + rtb_Add_idx_0 * rtb_Add_idx_2 /
+    8.0) - q_l_dot_opt_tmp_5 * w_l1m * q_l_dot_opt_tmp_6 / 8.0) -
+                       q_l_dot_opt_tmp_1 * w_l2m * q_l_dot_opt_tmp_3 / 8.0) *
+                      rtU.load + (((10481.0 * rtb_Add_idx_1 / 100000.0 + 10481.0
+    * rtb_Add_idx_2 / 100000.0) + 7.409300489671729E+15 * rtb_MinMax *
+    rtb_Add_idx_1 / 7.2057594037927936E+17) + 7.409300489671729E+15 *
+    rtb_Add_idx_0 * rtb_Add_idx_2 / 7.2057594037927936E+17)) -
+                     7.409300489671729E+15 * std::cos(rtU.q2l_n) * w_l1m *
+                     q_l_dot_opt_tmp_6 / 7.2057594037927936E+17) -
                     7.409300489671729E+15 * std::cos(rtU.q2r_n) * w_l2m *
                     q_l_dot_opt_tmp_3 / 7.2057594037927936E+17) / (rtU.load +
     1.6);
   rtY.CoM_bar[2] = -((((((((((11.0 * q_l_dot_opt_tmp_0 * q_l_dot_opt_tmp_5 /
     80.0 + 11.0 * q_l_dot_opt_tmp_2 * q_l_dot_opt_tmp_1 / 80.0) - (w_l3m *
-    rtb_AvoidDividebyZero - q_l_dot_opt_tmp_0 * w_l3M * w_l1m) *
+    rtb_AvoidDividebyZero - q_l_dot_opt_tmp_0 * rtb_Add_idx_1 * w_l1m) *
     q_l_dot_opt_tmp_6 / 8.0) - (w_l4m * q_l_dot_opt_tmp - q_l_dot_opt_tmp_2 *
-    w_l4M * w_l2m) * q_l_dot_opt_tmp_3 / 8.0) + q_l_dot_opt_tmp_0 *
+    rtb_Add_idx_2 * w_l2m) * q_l_dot_opt_tmp_3 / 8.0) + q_l_dot_opt_tmp_0 *
     q_l_dot_opt_tmp_5 * rtb_MinMax / 8.0) + q_l_dot_opt_tmp_2 *
-    q_l_dot_opt_tmp_1 * w_l2M / 8.0) * rtU.load + (((((10879.0 *
+    q_l_dot_opt_tmp_1 * rtb_Add_idx_0 / 8.0) * rtU.load + (((((10879.0 *
     q_l_dot_opt_tmp_0 / 5.0E+6 + 10879.0 * q_l_dot_opt_tmp_2 / 5.0E+6) - 3.0 *
     rtb_AvoidDividebyZero / 800.0) - 3.0 * q_l_dot_opt_tmp / 800.0) + 10481.0 *
     q_l_dot_opt_tmp_0 * q_l_dot_opt_tmp_5 / 100000.0) + 10481.0 *
@@ -4023,7 +4006,7 @@ void CLIK::step()
                        7.2057594037927936E+17) + 7.409300489671729E+15 *
                       q_l_dot_opt_tmp_0 * q_l_dot_opt_tmp_5 * rtb_MinMax /
                       7.2057594037927936E+17) + 7.409300489671729E+15 *
-                     q_l_dot_opt_tmp_2 * q_l_dot_opt_tmp_1 * w_l2M /
+                     q_l_dot_opt_tmp_2 * q_l_dot_opt_tmp_1 * rtb_Add_idx_0 /
                      7.2057594037927936E+17) / (rtU.load + 1.6);
 
   // MATLAB Function: '<S1>/q_l_dot' incorporates:

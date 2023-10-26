@@ -7,9 +7,9 @@
 //
 // Code generated for Simulink model 'CLIK'.
 //
-// Model version                  : 3.72
+// Model version                  : 3.74
 // Simulink Coder version         : 9.8 (R2022b) 13-May-2022
-// C/C++ source code generated on : Thu Sep  7 16:30:16 2023
+// C/C++ source code generated on : Sat Oct 14 10:34:16 2023
 //
 // Target selection: ert.tlc
 // Embedded hardware selection: Intel->x86-64 (Linux 64)

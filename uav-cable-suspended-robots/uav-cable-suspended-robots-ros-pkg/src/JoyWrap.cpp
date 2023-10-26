@@ -5,9 +5,9 @@
 #include "tf/transform_listener.h"
 #include <tf2/LinearMath/Quaternion.h>
 #include <std_msgs/Float64.h>
+#include "std_msgs/Float64MultiArray.h"
 
 #define RATE 100
-#define L_half 0.18
 
 using namespace std;
 
@@ -16,9 +16,11 @@ class JOY_WRAP {
 		JOY_WRAP();
 		void cb(sensor_msgs::Joy::ConstPtr msg);
 		void activation_cb(std_msgs::Float64::ConstPtr msg);
+		void psi_cb(std_msgs::Float64::ConstPtr msg);
 		void pub_ref();
 	private:
 		double _rescaleValue;
+		double _shared_control_rescale;
 		double _x_speed;
 		double _y_speed;
 		double _z_speed;
@@ -27,24 +29,37 @@ class JOY_WRAP {
 		int _button;
 		int _old_button;
 		bool _active;
+		double L_half;
+		double psi;
+		bool reset_pos;
 		tf::Transform _ref_trans;
 		tf::TransformBroadcaster _trans_br;
 		ros::NodeHandle _nh;
 		ros::Subscriber _topic_sub;
 		ros::Subscriber _activation_sub;
+		ros::Subscriber _psi_sub;
+		ros::Publisher _grip_pub;
+		ros::Publisher _shared_control_pub;
 		ros::Rate _rate;
 };
 
 JOY_WRAP::JOY_WRAP(): _rate(RATE) {
 	_rescaleValue = 0.1;
+	_shared_control_rescale = 1;
 	_x_speed = 0;
 	_y_speed = 0;
 	_z_speed = 0;
 	_state = _old_state = 0;
 	_button = _old_button = 0;
 	_active = false;
+	L_half = 0.18;
+	psi = 0;
+	reset_pos = false;
 	_topic_sub = _nh.subscribe("/joy", 1, &JOY_WRAP::cb, this);
+	_psi_sub = _nh.subscribe("/licasa1/psi", 1, &JOY_WRAP::psi_cb, this);
 	_activation_sub = _nh.subscribe("/licasa1/joywrap_start", 1, &JOY_WRAP::activation_cb, this);
+	_grip_pub = _nh.advertise< std_msgs::Float64 > ("/licasa1/L_half", 1);
+	_shared_control_pub = _nh.advertise< std_msgs::Float64MultiArray > ("/licasa1/shared_control", 1);
 	boost::thread(&JOY_WRAP::pub_ref, this);
 }
 
@@ -55,6 +70,24 @@ void JOY_WRAP::cb(sensor_msgs::Joy::ConstPtr msg) {
 	_x_speed = msg->axes[3]*_rescaleValue;
 
 	_button = msg->buttons[2];
+
+	if (msg->buttons[0] == 1) {
+		L_half = L_half - 0.005;
+		cout<<"Closing grip\n";
+		cout<<L_half<<endl;
+	}
+
+	if (msg->buttons[1] == 1) {
+		L_half = L_half + 0.005;
+		cout<<"Opening grip\n";
+		cout<<L_half<<endl;
+	}
+
+	if (msg->buttons[3] == 1) {
+		reset_pos = true;
+	} else {
+		reset_pos = false;
+	}
 
 	if (_button == 1 && _old_button == 0) {
 		_state = (_state + 1)%2;
@@ -69,6 +102,10 @@ void JOY_WRAP::activation_cb(std_msgs::Float64::ConstPtr f) {
 		_active = true;
 		cout<<"JOY_WRAP activated!\n";
 	}
+}
+
+void JOY_WRAP::psi_cb(std_msgs::Float64::ConstPtr f) {
+	psi = f->data;
 }
 
 void JOY_WRAP::pub_ref() {
@@ -105,6 +142,9 @@ void JOY_WRAP::pub_ref() {
 	double x_world = 0;
 	double y_world = 0;
 	double z_world = 0;
+	double delta_x_world = 0;
+	double delta_y_world = 0;
+	double delta_z_world = 0;
 	tf::Transform _right_ref_trans;
 	tf::Transform _left_ref_trans;
 	while (ros::ok()) {
@@ -117,8 +157,15 @@ void JOY_WRAP::pub_ref() {
 			z_world = (left_eef.getOrigin().z()+right_eef.getOrigin().z())/2;
 		}
 		if (_state == 1) {
-			x_world = x_world + _x_speed/RATE;
-			y_world = y_world + _y_speed/RATE;
+			delta_x_world = delta_x_world + cos(psi)*_x_speed/RATE + sin(psi)*_y_speed/RATE;
+			delta_y_world = delta_y_world + sin(psi)*_x_speed/RATE - cos(psi)*_y_speed/RATE;
+			cout<<"delta_x_world: "<<delta_x_world<<" delta_y_world: "<<delta_y_world<<endl;
+			delta_z_world = delta_z_world - _z_speed/RATE;
+
+			x_world = x_world + cos(psi)*_x_speed/RATE + sin(psi)*_y_speed/RATE;
+			y_world = y_world - sin(psi)*_x_speed/RATE + cos(psi)*_y_speed/RATE;
+			// cout<<"x_world: "<<x_world<<endl<<"y_world: "<<y_world<<endl;
+			// cout<<cos(psi)<<" "<<sin(psi)<<endl;
 			z_world = z_world + _z_speed/RATE;
 			//cout<<"Current ref position computed\n";
 			_ref_trans.setOrigin(tf::Vector3(x_world, y_world, z_world));
@@ -130,6 +177,7 @@ void JOY_WRAP::pub_ref() {
 			_trans_br.sendTransform(tf::StampedTransform(_ref_trans, ros::Time::now(), "world", "ref_frame"));
 			_trans_br.sendTransform(tf::StampedTransform(_left_ref_trans, ros::Time::now(), "world", "left_ref_frame"));
 			_trans_br.sendTransform(tf::StampedTransform(_right_ref_trans, ros::Time::now(), "world", "right_ref_frame"));
+
 		}
 		if (_state == 0 && _old_state == 1) {
 			listener.lookupTransform("shoulder_link_y","left_eef_link",ros::Time(0), left_eef);
@@ -153,7 +201,26 @@ void JOY_WRAP::pub_ref() {
 			_trans_br.sendTransform(tf::StampedTransform(_ref_trans, ros::Time::now(), "shoulder_link_y", "ref_frame"));
 			_trans_br.sendTransform(tf::StampedTransform(_left_ref_trans, ros::Time::now(), "shoulder_link_y", "left_ref_frame"));
 			_trans_br.sendTransform(tf::StampedTransform(_right_ref_trans, ros::Time::now(), "shoulder_link_y", "right_ref_frame"));
+
+			if (reset_pos == true) {
+				delta_x_world = delta_x_world*0.99;
+				delta_y_world = delta_y_world*0.99;
+				delta_z_world = delta_z_world*0.99;
+				cout<<"Bringing shared_control_pos to zero\n";
+			}
 		}
+
+		std_msgs::Float64MultiArray shared_control_msg;
+		shared_control_msg.data.clear();
+		shared_control_msg.data.push_back(delta_x_world);
+		shared_control_msg.data.push_back(delta_y_world);
+		shared_control_msg.data.push_back(delta_z_world);
+		_shared_control_pub.publish(shared_control_msg);
+
+		std_msgs::Float64 grip_msg;
+		grip_msg.data = L_half;
+		_grip_pub.publish(grip_msg); 
+
 		_old_state = _state;
 		// cout<<"Active: "<<_active<<endl;
 		_rate.sleep();

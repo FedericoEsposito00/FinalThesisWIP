@@ -38,7 +38,7 @@
 
   <!-- Main multirotor link -->
   <xacro:macro name="multirotor_base_macro"
-    params="robot_namespace mass body_width body_height use_mesh_file mesh_file *inertia">
+    params="robot_namespace mass body_width body_height use_mesh_file mesh_file mesh_scale *inertia">
     <link name="${robot_namespace}/base_link"></link>
 
     <joint name="${robot_namespace}/base_joint" type="fixed">
@@ -58,7 +58,7 @@
         <origin xyz="0 0 0" rpy="0 0 0" />
         <geometry>
           <xacro:if value="${use_mesh_file}">
-            <mesh filename="${mesh_file}" scale="1 1 1" />
+            <mesh filename="${mesh_file}" scale="${mesh_scale}" />
           </xacro:if>
           <xacro:unless value="${use_mesh_file}">
             <box size="${body_width} ${body_width} ${body_height}"/> <!-- [m] [m] [m] -->

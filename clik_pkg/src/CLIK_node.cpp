@@ -13,6 +13,8 @@
 #include <std_msgs/Float64.h>
 #include <ros/package.h>
 
+#include "std_msgs/Float64MultiArray.h"
+
 //Include Tf libraries
 #include "tf/transform_broadcaster.h"
 #include "tf/transform_listener.h"
@@ -22,7 +24,6 @@
 #include "CLIK.h"   
 
 #define RATE 100
-#define L_half 0.18
 #define def_load 0
 #define def_K_second 1000
 #define def_q1l_n 0
@@ -43,6 +44,7 @@ class CLIK_NODE {
 
         void joint_states_cb( sensor_msgs::JointState );
         void move_arms_cb( std_msgs::Float64 );
+        void grip_cb( std_msgs::Float64 ); 
         void goto_initial_position( double dp_l[NJ], double dp_r[NJ] );
         void ctrl_loop();
         void run();
@@ -66,12 +68,17 @@ class CLIK_NODE {
 
         bool _move_arms;
 
+        double L_half;
+
         //ROS topic objects
         ros::Subscriber _js_sub;
         ros::Subscriber _move_arms_sub;
+        ros::Subscriber _grip_sub;
 		ros::Publisher _left_cmd_pub[NJ];
         ros::Publisher _right_cmd_pub[NJ];
         ros::Publisher _activate_joywrap;
+
+        ros::Publisher _estimate_pub;
 
         //TF objects
         tf::TransformListener _listener;
@@ -84,6 +91,16 @@ class CLIK_NODE {
 CLIK_NODE::CLIK_NODE() {
     _js_sub = _nh.subscribe("/licasa1/joint_states", 0, &CLIK_NODE::joint_states_cb, this);
     _move_arms_sub = _nh.subscribe("/licasa1/move_arms", 0, &CLIK_NODE::move_arms_cb, this);
+    _grip_sub = _nh.subscribe("/licasa1/L_half", 0, &CLIK_NODE::grip_cb, this);
+
+    // Added to initialize /licasa1/estimate for rqt
+    _estimate_pub = _nh.advertise< std_msgs::Float64MultiArray > ("/licasa1/estimate", 1);
+    std_msgs::Float64MultiArray est_msg;
+    est_msg.data.clear();
+    for (int i = 0; i < 6; i++) {
+        est_msg.data.push_back(0);
+    }
+    _estimate_pub.publish(est_msg); 
 
     _move_arms = true;
 
@@ -120,11 +137,13 @@ CLIK_NODE::CLIK_NODE() {
     xd[0] = 0.2494;
     xd[1] = 0;
     xd[2] = -0.2927;
+    L_half = 0.18;
 
     rtObj.initialize();
 
     rtObj.rtU.load = def_load;
     rtObj.rtU.K_second = def_K_second;
+    rtObj.rtU.L_half = L_half;
 
     rtObj.rtU.q1l_n = def_q1l_n;
     rtObj.rtU.q2l_n = def_q2l_n;
@@ -158,6 +177,10 @@ void CLIK_NODE::move_arms_cb( std_msgs::Float64 f) {
     } else {
         _move_arms = false;
     }
+}
+
+void CLIK_NODE::grip_cb( std_msgs::Float64 f) {
+    L_half = f.data;
 }
 
 void CLIK_NODE::goto_initial_position( double dp_l[NJ], double dp_r[NJ] ) {
@@ -254,6 +277,7 @@ void CLIK_NODE::ctrl_loop() {
         rtObj.rtU.q2r = qr[1];
         rtObj.rtU.q3r = qr[2];
         rtObj.rtU.q4r = qr[3];
+        rtObj.rtU.L_half = L_half;
         
         // If _move_arms is false CLIK isn't called, so the joints keep on following the previous reference
         if (_move_arms == true) { 

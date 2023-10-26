@@ -110,6 +110,38 @@
       </geometry>
     </collision>
   </link> 
+  
+  <gazebo reference="left_launchpad">
+    <material>Gazebo/Turquoise</material>
+    <mu1>0.5</mu1>
+    <mu2>0.5</mu2>
+    <kp value="1e6" />
+    <kd value="1e6" />
+  </gazebo>
+  
+  <gazebo reference="left_launchpad_top">
+    <material>Gazebo/Turquoise</material>
+    <mu1>0.5</mu1>
+    <mu2>0.5</mu2>
+    <kp value="1e6" />
+    <kd value="1e6" />
+  </gazebo>
+  
+  <gazebo reference="right_launchpad">
+    <material>Gazebo/Turquoise</material>
+    <mu1>0.5</mu1>
+    <mu2>0.5</mu2>
+    <kp value="1e6" />
+    <kd value="1e6" />
+  </gazebo>
+  
+  <gazebo reference="right_launchpad_top">
+    <material>Gazebo/Turquoise</material>
+    <mu1>0.5</mu1>
+    <mu2>0.5</mu2>
+    <kp value="1e6" />
+    <kd value="1e6" />
+  </gazebo>
 
   <!-- <joint name="sensor_wall_base_joint" type="fixed">
     <origin xyz="2.5 0 0.05"/>

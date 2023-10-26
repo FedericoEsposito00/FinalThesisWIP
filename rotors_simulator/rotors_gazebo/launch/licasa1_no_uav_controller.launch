@@ -24,6 +24,7 @@
   <group ns="$(arg mav_name)">
     <include file="$(find uav-cable-suspended-robots-ros-pkg)/launch/spawn_licasa1_launchpad.launch" />
     <!-- <include file="$(find uav-cable-suspended-robots-ros-pkg)/launch/spawn_licasa1_sensor_wall.launch" /> -->
+    <include file="$(find uav-cable-suspended-robots-ros-pkg)/launch/spawn_licasa1_cube.launch" />
     <include file="$(find rotors_gazebo)/launch/spawn_mav.launch">
       <arg name="mav_name" value="$(arg mav_name)" />
       <arg name="model" value="$(find rotors_description)/urdf/mav_generic_odometry_sensor.gazebo" />

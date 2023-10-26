@@ -24,8 +24,10 @@
   <xacro:property name="namespace" value="$(arg namespace)" />  
   <xacro:property name="rotor_velocity_slowdown_sim" value="10" />
   <xacro:property name="use_mesh_file" value="true" /> <!-- true -->
-  <xacro:property name="mesh_file" value="package://rotors_description/meshes/firefly.dae" />
-  <xacro:property name="mass" value="20.269" /> <!-- 1.5 [kg] -->
+  <xacro:property name="mesh_file" value="package://rotors_description/meshes/pelican.dae" /> 
+  <!-- <xacro:property name="mesh_file" value="package://rotors_description/meshes/Assembly_X4.stl" /> -->
+  <xacro:property name="mesh_scale" value="3.1 3.1 1.5" />
+  <xacro:property name="mass" value="20.269" /> <!-- 20.269 [kg] -->
   <xacro:property name="body_width" value="0.6" /> <!-- 0.1 [m] -->
   <xacro:property name="body_height" value="0.24" /> <!-- 0.16 [m] -->
   <xacro:property name="mass_rotor" value="0.0001" /> <!-- 0.005 [kg] -->
@@ -64,6 +66,7 @@
     body_height="${body_height}"
     use_mesh_file="${use_mesh_file}"
     mesh_file="${mesh_file}"
+    mesh_scale="${mesh_scale}"
     >
     <xacro:insert_block name="body_inertia" />
   </xacro:multirotor_base_macro>
@@ -576,18 +579,20 @@
       <mass value="1e-3" />
       <inertia ixx="1e-03" ixy="0.0" ixz="0.0" iyy="1e-03" iyz="0.0" izz="1e-03"/>
     </inertial>
-    <!-- <visual>
+    <visual>
       <origin xyz="0 0 0"/> 
       <geometry>
-        <sphere radius="0.02"/>
+        <!-- <sphere radius="0.02"/> -->
+        <box size="0.04 0.04 0.04" />
       </geometry>
     </visual>
     <collision>
       <origin xyz="0 0 0"/>
       <geometry>
-        <sphere radius="0.02"/>
+        <!-- <sphere radius="0.02"/> -->
+        <box size="0.04 0.04 0.04" />
       </geometry>
-    </collision> -->
+    </collision> 
   </link>
   
   <joint name="left_eef_joint" type="fixed">
@@ -602,18 +607,97 @@
       <mass value="1e-3" />
       <inertia ixx="1e-03" ixy="0.0" ixz="0.0" iyy="1e-03" iyz="0.0" izz="1e-03"/>
     </inertial>
-    <!-- <visual>
+    <visual>
       <origin xyz="0 0 0"/> 
       <geometry>
-        <sphere radius="0.02"/>
+        <!-- <sphere radius="0.02"/> -->
+        <box size="0.04 0.04 0.04" />
       </geometry>
     </visual>
     <collision>
       <origin xyz="0 0 0"/>
       <geometry>
-        <sphere radius="0.02"/>
+        <!-- <sphere radius="0.02"/> -->
+        <box size="0.04 0.04 0.04" />
       </geometry>
-    </collision> -->
+    </collision> 
   </link> 
+
+  <!-- <joint name="right_eef_joint_1" type="revolute">
+    <origin xyz="0 0 0"/>
+    <parent link="right_eef_link"/>
+    <child link="right_eef_link_1"/>
+    <axis xyz="0 0 1"/>
+    <dynamics damping="0.0" friction="0.0"/>
+    <limit effort="10.0" lower="0" upper="0" velocity="6"/>
+  </joint>
+  
+  <link name="right_eef_link_1">
+    <inertial>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <mass value="1e-3" />
+      <inertia ixx="1e-03" ixy="0.0" ixz="0.0" iyy="1e-03" iyz="0.0" izz="1e-03"/>
+    </inertial>
+  </link>
+  
+  <joint name="left_eef_joint_1" type="revolute">
+    <origin xyz="0 0 0"/>
+    <parent link="left_eef_link"/>
+    <child link="left_eef_link_1"/>
+    <axis xyz="0 0 1"/>
+    <dynamics damping="0.0" friction="0.0"/>
+    <limit effort="10.0" lower="0" upper="0" velocity="6"/>
+  </joint>
+  
+  <link name="left_eef_link_1">
+    <inertial>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <mass value="1e-3" />
+      <inertia ixx="1e-03" ixy="0.0" ixz="0.0" iyy="1e-03" iyz="0.0" izz="1e-03"/>
+    </inertial>
+  </link>  -->
+
+  <gazebo>
+    <plugin name="f3d_plugin" filename="libgazebo_ros_f3d.so">
+      <robotNamespace>licasa1</robotNamespace>
+      <bodyName>left_eef_link</bodyName>
+      <topicName>left_eef_link/body_wrench</topicName>
+    </plugin>
+  </gazebo>  
+
+  <gazebo>
+    <plugin name="f3d_plugin" filename="libgazebo_ros_f3d.so">
+      <robotNamespace>licasa1</robotNamespace>
+      <bodyName>right_eef_link</bodyName>
+      <topicName>right_eef_link/body_wrench</topicName>
+    </plugin>
+  </gazebo>  
+
+  <!-- GRASP PLUGIN -->
+  <!-- <gazebo>
+   <plugin name="gazebo_grasp_fix" filename="libgazebo_grasp_fix.so">
+        <arm>
+           <arm_name>licasa1_arm</arm_name>
+           <palm_link>shoulder_link_y</palm_link>
+           <gripper_link>left_shoulder_roll</gripper_link>
+           <gripper_link>left_shoulder_yaw</gripper_link>
+           <gripper_link>left_elbow_pitch</gripper_link>
+           <gripper_link>left_forearm_link</gripper_link>
+           <gripper_link>left_eef_link</gripper_link>
+           <gripper_link>right_shoulder_roll</gripper_link>
+           <gripper_link>right_shoulder_yaw</gripper_link>
+           <gripper_link>right_elbow_pitch</gripper_link>
+           <gripper_link>right_forearm_link</gripper_link>
+           <gripper_link>right_eef_link</gripper_link>
+        </arm>
+       <forces_angle_tolerance>100</forces_angle_tolerance>
+       <update_rate>4</update_rate>
+       <grip_count_threshold>4</grip_count_threshold>
+       <max_grip_count>8</max_grip_count>
+       <release_tolerance>0.005</release_tolerance>
+       <disable_collisions_on_attach>false</disable_collisions_on_attach>
+       <contact_topic>/licasa1/contact_topic</contact_topic>
+    </plugin>
+</gazebo> -->
   
 </robot>

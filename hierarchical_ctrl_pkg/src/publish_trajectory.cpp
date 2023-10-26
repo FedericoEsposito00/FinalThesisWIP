@@ -19,6 +19,8 @@ class PUB_TRA {
 		PUB_TRA();
 		void cb(std_msgs::Float64MultiArray::ConstPtr msg);
 		void control_cb(std_msgs::Float64MultiArray::ConstPtr msg);
+		void shared_control_cb(std_msgs::Float64MultiArray::ConstPtr msg);
+		void psi_cb(std_msgs::Float64::ConstPtr msg);
 		void pub_trajectory();
 	private:
 
@@ -38,14 +40,21 @@ class PUB_TRA {
 		double* P_dd_psi;
 
 		double est[6];
+		double psi;
 
 		bool activate_control;
 		double F_des; // absolute value of the desired force
 		double angle; // angle of the force that the robot feels from the environment
+		bool forward;
+
+		double delta_x_send_shared;
+		double delta_y_send_shared;
+		double delta_z_send_shared;
 
 		ros::NodeHandle _nh;
 		ros::Publisher _topic_pub;
 		ros::Subscriber _topic_sub;
+		ros::Subscriber _shared_control_sub;
 		ros::Subscriber _activate_control_sub;
 		ros::Rate _rate;
 };
@@ -54,6 +63,7 @@ PUB_TRA::PUB_TRA(): _rate(RATE) {
 	_topic_sub = _nh.subscribe("/licasa1/estimate", 1, &PUB_TRA::cb, this);
 	_topic_pub = _nh.advertise< std_msgs::Float64MultiArray > ("/licasa1/ref_topic", 1);
 	_activate_control_sub = _nh.subscribe("/licasa1/activate_control", 1, &PUB_TRA::control_cb, this);
+	_shared_control_sub = _nh.subscribe("/licasa1/shared_control", 1, &PUB_TRA::shared_control_cb, this);
 
 	ifstream ref;
 
@@ -100,10 +110,17 @@ PUB_TRA::PUB_TRA(): _rate(RATE) {
 		est[i] = 0;
 	}
 
+	psi = 0;
+
 	F_des = 0;
 	angle = 0;
 
 	activate_control = false;
+	forward = true;
+
+	delta_x_send_shared = 0;
+	delta_y_send_shared = 0;
+	delta_z_send_shared = 0;
 
 	ref.close();
 	
@@ -117,6 +134,10 @@ void PUB_TRA::cb(std_msgs::Float64MultiArray::ConstPtr msg) {
 	}
 }
 
+void PUB_TRA::psi_cb(std_msgs::Float64::ConstPtr msg) {
+	psi = msg->data;
+}
+
 //Callback function: the input of the function is the data to read
 void PUB_TRA::control_cb(std_msgs::Float64MultiArray::ConstPtr msg) {
 	if (msg->data[0] > 0) {
@@ -127,6 +148,19 @@ void PUB_TRA::control_cb(std_msgs::Float64MultiArray::ConstPtr msg) {
 
 	F_des = msg->data[1];
 	angle = msg->data[2];
+
+	if (msg->data[3] > 0) {
+		forward = true;
+	} else {
+		forward = false;
+	}
+}
+
+//Callback function: the input of the function is the data to read
+void PUB_TRA::shared_control_cb(std_msgs::Float64MultiArray::ConstPtr msg) {
+	delta_x_send_shared = delta_x_send_shared*0.95 + 0.05*msg->data[0];
+	delta_y_send_shared = delta_y_send_shared*0.95 + 0.05*msg->data[1];
+	delta_z_send_shared = delta_z_send_shared*0.95 + 0.05*msg->data[2];
 }
 
 void PUB_TRA::pub_trajectory() {
@@ -180,11 +214,11 @@ void PUB_TRA::pub_trajectory() {
 		}
 
 		ref_msg.data.clear();
-		ref_msg.data.push_back(P_x[ii] + delta_x_send*cos(P_psi[ii]) - delta_y_send*sin(P_psi[ii]));
-		//cout<<"x: "<<P_x[ii] + delta_x_send*cos(P_psi[ii]) - delta_y_send*sin(P_psi[ii])<<endl;
-		ref_msg.data.push_back(P_y[ii] + delta_x_send*sin(P_psi[ii]) + delta_y_send*cos(P_psi[ii]));
-		//cout<<"y: "<<P_y[ii] + delta_x_send*sin(P_psi[ii]) + delta_y_send*cos(P_psi[ii])<<endl;
-		ref_msg.data.push_back(P_z[ii]);
+		// ref_msg.data.push_back(P_x[ii] + delta_x_send*cos(P_psi[ii]) - delta_y_send*sin(P_psi[ii]) + delta_x_send_shared*cos(P_psi[ii]) - delta_y_send_shared*sin(P_psi[ii]));
+		ref_msg.data.push_back(P_x[ii] + delta_x_send*cos(psi) - delta_y_send*sin(psi) + delta_x_send_shared*cos(psi) - delta_y_send_shared*sin(psi));
+		// ref_msg.data.push_back(P_y[ii] + delta_x_send*sin(P_psi[ii]) + delta_y_send*cos(P_psi[ii]) + delta_x_send_shared*sin(P_psi[ii]) + delta_y_send_shared*cos(P_psi[ii]));
+		ref_msg.data.push_back(P_y[ii] + delta_x_send*sin(psi) + delta_y_send*cos(psi) + delta_x_send_shared*sin(psi) + delta_y_send_shared*cos(psi));
+		ref_msg.data.push_back(P_z[ii] + delta_z_send_shared);
 		ref_msg.data.push_back(P_psi[ii]);
 		ref_msg.data.push_back(P_d_x[ii]);
 		ref_msg.data.push_back(P_d_y[ii]);
@@ -199,8 +233,12 @@ void PUB_TRA::pub_trajectory() {
 
 		// cout<<"REF PUBLISHED\n";
 
-		if (ii < N-1) {
+		if (ii < N-1 && forward == true) {
 			ii++;
+		}
+
+		if (ii > 0 && forward == false) {
+			ii--;
 		}
 
 		_rate.sleep();

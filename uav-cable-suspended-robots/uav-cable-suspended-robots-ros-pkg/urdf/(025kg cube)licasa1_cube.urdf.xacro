@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+
+<!-- Robot Name --> 
+<robot name="LiCAS_A1_cube" xmlns:xacro="http://ros.org/wiki/xacro">
+  
+  <link name="cube">
+    <inertial>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <mass value="0.25" />
+      <!-- <inertia ixx="1.5e-2" ixy="0.0" ixz="0.0" iyy="1.5e-2" iyz="0.0" izz="1.5e-2"/> mass 1 size 0.3 -->
+      <!-- <inertia ixx="3e-3" ixy="0.0" ixz="0.0" iyy="2.167e-3" iyz="0.0" izz="2.167e-3"/> size 0.2 0.3 0.3-->
+      <inertia ixx="3.75e-3" ixy="0.0" ixz="0.0" iyy="3.75e-3" iyz="0.0" izz="3.75e-3"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0"/> 
+      <geometry>
+	      <box size="0.3 0.3 0.3"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0"/> 
+      <geometry>
+	      <box size="0.3 0.3 0.3"/>
+      </geometry>
+    </collision>
+  </link> 
+
+  <gazebo reference="cube">
+    <material>Gazebo/DarkGrey</material>
+    <mu1>0.5</mu1>
+    <mu2>0.5</mu2>
+    <kp value="1e3" />
+    <kd value="1e3" />
+  </gazebo>
+
+  <gazebo>
+    <plugin name="f3d_plugin" filename="libgazebo_ros_f3d.so">
+      <robotNamespace>licasa1</robotNamespace>
+      <bodyName>cube</bodyName>
+      <topicName>cube/body_wrench</topicName>
+    </plugin>
+  </gazebo>  
+
+</robot>

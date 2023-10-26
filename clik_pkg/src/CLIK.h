@@ -7,9 +7,9 @@
 //
 // Code generated for Simulink model 'CLIK'.
 //
-// Model version                  : 3.72
+// Model version                  : 3.74
 // Simulink Coder version         : 9.8 (R2022b) 13-May-2022
-// C/C++ source code generated on : Thu Sep  7 16:30:16 2023
+// C/C++ source code generated on : Sat Oct 14 10:34:16 2023
 //
 // Target selection: ert.tlc
 // Embedded hardware selection: Intel->x86-64 (Linux 64)
@@ -147,6 +147,7 @@ class CLIK final
     real_T K_l3m;                      // '<Root>/K_l3m'
     real_T K_l4M;                      // '<Root>/K_l4M'
     real_T K_l4m;                      // '<Root>/K_l4m'
+    real_T L_half;                     // '<Root>/L_half'
   };
 
   // External outputs (root outports fed by signals with default storage)

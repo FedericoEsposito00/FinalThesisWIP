@@ -86,6 +86,7 @@ class HC_NODE {
 
         // ROS topic objects
 		ros::Publisher _motor_speed_pub;
+        ros::Publisher _psi_pub;
         ros::Publisher _estimate_pub;
         ros::Subscriber _odom_sub;
         ros::Subscriber _imu_sub;
@@ -98,6 +99,7 @@ HC_NODE::HC_NODE() {
     // ROS topic initialization
     _motor_speed_pub = _nh.advertise< mav_msgs::Actuators > ("/licasa1/command/motor_speed", 1);
     _estimate_pub = _nh.advertise< std_msgs::Float64MultiArray > ("/licasa1/estimate", 1);
+    _psi_pub = _nh.advertise< std_msgs::Float64 > ("/licasa1/psi", 1);
 
     _odom_sub = _nh.subscribe("/licasa1/ground_truth/odometry", 0, &HC_NODE::odom_callback, this);	
 	_imu_sub = _nh.subscribe("/licasa1/ground_truth/imu", 0, &HC_NODE::imu_callback, this);	
@@ -143,13 +145,14 @@ HC_NODE::HC_NODE() {
 
     for (int i = 0; i < 3; i++) {
         rtObj.rtU.position[i] = _p_b(i);
-        rtObj.rtU.linear_vel[i] = _p_b_dot(i);
+        rtObj.rtU.linear_vel[i] = est.rtU.p_dot[i] = _p_b_dot(i);
         rtObj.rtU.eta[i] = est.rtU.eta[i] = _eta_b(i);
         rtObj.rtU.eta_dot[i] = est.rtU.eta_dot[i] = _eta_b_dot(i);
         rtObj.rtU.position_des[i] = _pos_ref(i);
-        rtObj.rtU.vel_linear_des[i] = est.rtU.p_dot[i] = _pos_ref_dot(i);
+        rtObj.rtU.vel_linear_des[i] = _pos_ref_dot(i);
         rtObj.rtU.acc_linear_des[i] = _pos_ref_dot_dot(i);
-        est.rtU.u[i] = est.rtU.tau[i] = 0;
+        est.rtU.u[i] = u[i];
+        est.rtU.tau[i] = tau[i];
     }
 
     rtObj.rtU.psi_d = psi_d;
@@ -371,6 +374,12 @@ void HC_NODE::ctrl_loop() {
         rtObj.step();
 
         // Controller output
+
+        for (int i = 0; i < 3; i ++) {
+            u[i] = rtObj.rtY.u[i];
+            tau[i] = rtObj.rtY.u[i+3];
+        }
+
 		mav_msgs::Actuators cmd;
         cmd.angular_velocities.clear();
 
@@ -381,6 +390,11 @@ void HC_NODE::ctrl_loop() {
 
         //Publish all the commands in topics
 	    _motor_speed_pub.publish(cmd);
+
+        std_msgs::Float64 psi_msg;
+        psi_msg.data = _eta_b(2);
+        _psi_pub.publish(psi_msg);
+
 
 
         // DEBUG 

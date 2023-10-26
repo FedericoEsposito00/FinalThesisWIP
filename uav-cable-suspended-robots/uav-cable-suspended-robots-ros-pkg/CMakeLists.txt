@@ -16,6 +16,7 @@ find_package(catkin REQUIRED COMPONENTS
   sensor_msgs
   roslib
   tf
+  gazebo_msgs
 )
 
 find_package(Eigen3 REQUIRED)
@@ -150,6 +151,7 @@ add_executable(ArmsInducedOscillationCranebot_uav src/ArmsInducedOscillationCran
 add_executable(JoyWrap_uav src/JoyWrap.cpp)
 add_executable(BoundedJoyWrap_uav src/BoundedJoyWrap.cpp)
 add_executable(SensorFilter_uav src/SensorFilter.cpp)
+add_executable(CubeTfPub_uav src/CubeTfPub.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -172,6 +174,7 @@ target_link_libraries(ArmsInducedOscillationCranebot_uav ${catkin_LIBRARIES} ${E
 target_link_libraries(JoyWrap_uav ${catkin_LIBRARIES})
 target_link_libraries(BoundedJoyWrap_uav ${catkin_LIBRARIES})
 target_link_libraries(SensorFilter_uav ${catkin_LIBRARIES})
+target_link_libraries(CubeTfPub_uav ${catkin_LIBRARIES})
 
 #############
 ## Install ##
